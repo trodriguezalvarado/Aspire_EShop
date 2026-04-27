@@ -1,0 +1,85 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.34928.147
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TiendaAspire.AppHost", "TiendaAspire.AppHost\TiendaAspire.AppHost.csproj", "{870FA539-C8E9-44F3-A16F-205AD2321DB2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TiendaAspire.ServiceDefaults", "TiendaAspire.ServiceDefaults\TiendaAspire.ServiceDefaults.csproj", "{36D20D36-219B-47DF-930A-68790258088E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TiendaAspire.ApiService", "TiendaAspire.ApiService\TiendaAspire.ApiService.csproj", "{8454934C-1CA7-4E68-9DD5-ECCDEA671C1C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TiendaAspire.Web", "TiendaAspire.Web\TiendaAspire.Web.csproj", "{358243E9-DECE-40C5-954E-8C8206007A11}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InventarioService", "InventarioService\InventarioService.csproj", "{458F2D5D-F6E8-4B1C-AF2E-74CD5DE3931D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TiendaAspire.Data", "TiendaAspire.Data\TiendaAspire.Data.csproj", "{AAB140AC-4194-41DD-B26D-9923D68172B5}"
+EndProject
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "TiendaAspire.admin-dashBoard", "TiendaAspire.admin-dashBoard\", "{E2E202A6-AE6B-4C32-B2E9-1EBE87C2FFFB}"
+	ProjectSection(WebsiteProperties) = preProject
+		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.0"
+		Debug.AspNetCompiler.VirtualPath = "/localhost_5440"
+		Debug.AspNetCompiler.PhysicalPath = "TiendaAspire.admin-dashBoard\"
+		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_5440\"
+		Debug.AspNetCompiler.Updateable = "true"
+		Debug.AspNetCompiler.ForceOverwrite = "true"
+		Debug.AspNetCompiler.FixedNames = "false"
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.VirtualPath = "/localhost_5440"
+		Release.AspNetCompiler.PhysicalPath = "TiendaAspire.admin-dashBoard\"
+		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_5440\"
+		Release.AspNetCompiler.Updateable = "true"
+		Release.AspNetCompiler.ForceOverwrite = "true"
+		Release.AspNetCompiler.FixedNames = "false"
+		Release.AspNetCompiler.Debug = "False"
+		VWDPort = "5440"
+		SlnRelativePath = "TiendaAspire.admin-dashBoard\"
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{58BE53D3-9862-4DEC-AC70-E6F174346991}"
+	ProjectSection(SolutionItems) = preProject
+		docker-compose.override.yml = docker-compose.override.yml
+		docker-compose.yml = docker-compose.yml
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{870FA539-C8E9-44F3-A16F-205AD2321DB2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{870FA539-C8E9-44F3-A16F-205AD2321DB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{870FA539-C8E9-44F3-A16F-205AD2321DB2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{870FA539-C8E9-44F3-A16F-205AD2321DB2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{36D20D36-219B-47DF-930A-68790258088E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{36D20D36-219B-47DF-930A-68790258088E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{36D20D36-219B-47DF-930A-68790258088E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{36D20D36-219B-47DF-930A-68790258088E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8454934C-1CA7-4E68-9DD5-ECCDEA671C1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8454934C-1CA7-4E68-9DD5-ECCDEA671C1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8454934C-1CA7-4E68-9DD5-ECCDEA671C1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8454934C-1CA7-4E68-9DD5-ECCDEA671C1C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{358243E9-DECE-40C5-954E-8C8206007A11}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{358243E9-DECE-40C5-954E-8C8206007A11}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{358243E9-DECE-40C5-954E-8C8206007A11}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{358243E9-DECE-40C5-954E-8C8206007A11}.Release|Any CPU.Build.0 = Release|Any CPU
+		{458F2D5D-F6E8-4B1C-AF2E-74CD5DE3931D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{458F2D5D-F6E8-4B1C-AF2E-74CD5DE3931D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{458F2D5D-F6E8-4B1C-AF2E-74CD5DE3931D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{458F2D5D-F6E8-4B1C-AF2E-74CD5DE3931D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AAB140AC-4194-41DD-B26D-9923D68172B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AAB140AC-4194-41DD-B26D-9923D68172B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AAB140AC-4194-41DD-B26D-9923D68172B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AAB140AC-4194-41DD-B26D-9923D68172B5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E2E202A6-AE6B-4C32-B2E9-1EBE87C2FFFB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2E202A6-AE6B-4C32-B2E9-1EBE87C2FFFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2E202A6-AE6B-4C32-B2E9-1EBE87C2FFFB}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2E202A6-AE6B-4C32-B2E9-1EBE87C2FFFB}.Release|Any CPU.Build.0 = Debug|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B1E72347-A065-4397-8D3B-6D358759E51F}
+	EndGlobalSection
+EndGlobal

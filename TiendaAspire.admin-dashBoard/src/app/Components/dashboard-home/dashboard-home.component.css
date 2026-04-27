@@ -1,0 +1,19 @@
+.card {
+  border: 1px solid #ddd;
+  padding: 20px;
+  border-radius: 8px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  background-color: white;
+}
+
+  /* Effect when hovering */
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    border-color: #007bff;
+  }
+
+  .card h3 {
+    color: #007bff;
+    margin-top: 0;
+  }

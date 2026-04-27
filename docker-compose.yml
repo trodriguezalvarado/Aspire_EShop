@@ -1,0 +1,121 @@
+services:
+  # Infraestructura comun
+  sql-server:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=T34m0W2kRalperios*
+    ports:
+      - "1434:1433"
+    healthcheck:
+          test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'T34m0W2kRalperios*' -Q 'SELECT 1' -C"]
+          interval: 10s
+          timeout: 5s
+          retries: 5
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    healthcheck:
+        test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+        interval: 10s
+        timeout: 5s
+        retries: 5
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    command: start-dev
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+    ports:
+      - "8081:8080"
+    volumes:
+      - keycloak_data:/opt/keycloak/data # Persistencia de usuarios
+  
+
+  # Tus Microservicios
+  inventario-api:
+    build: 
+      context: .
+      dockerfile: InventarioService/Dockerfile
+    depends_on: 
+        sql-server: 
+            condition: service_healthy
+        rabbitmq:
+            condition: service_healthy
+    environment:
+      - ConnectionStrings__inventorydb=Server=sql-server;Database=inventorydb;User Id=sa;Password=T34m0W2kRalperios*;TrustServerCertificate=True
+      - Aspire__RabbitMQ__Client__ConnectionString=amqp://guest:guest@rabbitmq:5672
+      - Authentication__Schemes__Bearer__Authority=http://keycloak:8080/realms/TiendaRealm
+      - DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_HTTP2UNENCRYPTEDSUPPORT=true
+      - Aspire__StackExchange__Redis__ConnectionString=redis:6379
+    networks:
+      default:
+        aliases:
+          - inventarioservice  # <--- Esto hace que http://catalogoservice funcione internamente
+
+  catalogo-api:
+    build:
+      context: .
+      dockerfile: TiendaAspire.ApiService/Dockerfile
+    depends_on: 
+        sql-server: 
+            condition: service_healthy
+        rabbitmq:
+            condition: service_healthy
+        redis:
+            condition: service_started
+    environment:
+      - ConnectionStrings__catalogdb=Server=sql-server;Database=catalogdb;User Id=sa;Password=T34m0W2kRalperios*;TrustServerCertificate=True
+      - Aspire__RabbitMQ__Client__ConnectionString=amqp://guest:guest@rabbitmq:5672
+      - Authentication__Schemes__Bearer__Authority=http://keycloak:8080/realms/TiendaRealm
+      - DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_HTTP2UNENCRYPTEDSUPPORT=true
+    networks:
+      default:
+        aliases:
+          - catalogoservice  # <--- Esto hace que http://catalogoservice funcione internamente
+
+  # Tu Dashboard Angular
+  admin-dashboard:
+    build:
+      context: .
+      dockerfile: TiendaAspire.admin-dashBoard/Dockerfile
+    ports:
+      - "5100:80"
+    depends_on:
+      catalogo-api:
+        condition: service_started
+      inventario-api:
+        condition: service_started
+    environment:
+      - KEYCLOAK_URL=http://keycloak:8080
+
+  tienda-web:
+    build:
+      context: .
+      dockerfile: TiendaAspire.Web/Dockerfile
+    ports:
+      - "9000:80"  # Cambia el 8080 por el 80 que muestran los logs
+     # - "8082:8080" # Access the store at http://localhost:8080
+    environment:
+      - services__catalogo-api__http__0=http://catalogo-api:80
+      - services__catalogo-api__https__0=http://catalogo-api:80
+    depends_on:
+      - catalogo-api
+    volumes:
+      - dataprotection-keys:/root/.aspnet/DataProtection-Keys
+
+
+
+volumes:
+  keycloak_data: # Definiciode volumen persistente
+  dataprotection-keys:
+  

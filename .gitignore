@@ -1,0 +1,58 @@
+# === [ .NET / ASPIRE ] ===
+**/bin/
+**/obj/
+**/TestResults/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+# No subir secretos de desarrollo ni configuraciones locales
+**/appsettings.Development.json
+**/UserSecrets/
+.aspnet/DataProtection-Keys/
+
+# === [ ANGULAR / NODE ] ===
+**/node_modules/
+**/dist/
+**/tmp/
+**/.angular/
+**/out-tsc/
+**/bazel-out/
+# Logs de error de npm
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+# Archivos de caché de compilación
+.npm/
+.eslintcache/
+
+# === [ DOCKER & INFRA ] ===
+# Ignorar bases de datos locales si se mapean a carpetas
+**/sql-data/
+**/redis-data/
+**/keycloak-data/
+# Archivos de entorno con contraseñas (¡CRÍTICO!)
+.env
+.env.local
+.env.*.local
+*.env
+# Logs de Docker
+*.log
+
+# === [ IDEs & SISTEMA ] ===
+.vscode/
+.vs/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.bak
+.DS_Store
+Thumbs.db
+
+# === [ ASPIRE SPECIFIC ] ===
+# Archivos temporales del AppHost
+**/AppHost/obj/
+**/AppHost/bin/

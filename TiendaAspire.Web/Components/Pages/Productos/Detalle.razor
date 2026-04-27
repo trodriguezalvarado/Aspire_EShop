@@ -1,0 +1,30 @@
+﻿@page "/producto/{Id:guid}"
+@using TiendaAspire.Data.Clases
+@inject CatalogClient Catalogo
+
+@if (producto == null)
+{
+    <p><em>Cargando detalle del producto...</em></p>
+}
+else
+{
+    <div class="container">
+        <h2>@producto.Nombre</h2>
+        <hr />
+        <p><strong>Identificador Único:</strong> @Id</p>
+        <p><strong>Stock disponible:</strong> @producto.Existencias</p>
+        <p><strong>Stock disponible:</strong> @producto.Status</p>
+        <button class="btn btn-secondary" onclick="history.back()">Volver</button>
+    </div>
+}
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+    private ProductoInfo? producto;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // Consultamos al API usando el GUID recibido en la URL
+        producto = await Catalogo.GetProductoDetalleAsync(Id);
+    }
+}

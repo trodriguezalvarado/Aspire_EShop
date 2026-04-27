@@ -1,0 +1,23 @@
+<nav class="navbar">
+  <div class="nav-brand" routerLink="/home" style="cursor: pointer;">
+    <strong>Tienda Admin</strong>
+  </div>
+
+  <div class="user-menu" *ngIf="username">
+    <span class="user-greeting">Welcome, <strong>{{ username }}</strong></span>
+
+    <div class="dropdown">
+      <button class="dropbtn">Settings ▼</button>
+      <div class="dropdown-content">
+        <a (click)="changePassword()">Change Password</a>
+        <a (click)="logout()" class="logout-link">Logout</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- The content of each page will appear here -->
+<div class="container">
+  <router-outlet></router-outlet>
+</div>
+

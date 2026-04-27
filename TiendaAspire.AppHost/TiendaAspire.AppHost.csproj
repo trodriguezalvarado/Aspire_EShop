@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsAspireHost>true</IsAspireHost>
+    <UserSecretsId>6e88e84a-33b3-4d7a-83cc-6ffb9a358ccc</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\InventarioService\InventarioService.csproj" />
+    <ProjectReference Include="..\TiendaAspire.ApiService\TiendaAspire.ApiService.csproj" />
+    <ProjectReference Include="..\TiendaAspire.Data\TiendaAspire.Data.csproj" />
+    <ProjectReference Include="..\TiendaAspire.Web\TiendaAspire.Web.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.AppHost" Version="8.2.2" />
+    <PackageReference Include="Aspire.Hosting.Keycloak" Version="8.2.2-preview.1.24521.5" />
+    <PackageReference Include="Aspire.Hosting.NodeJs" Version="8.2.2" />
+    <PackageReference Include="Aspire.Hosting.RabbitMQ" Version="8.2.2" />
+    <PackageReference Include="Aspire.Hosting.Redis" Version="8.2.2" />
+    <PackageReference Include="Aspire.Hosting.SqlServer" Version="8.2.2" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,44 @@
+﻿@page "/productos-view"
+@using TiendaAspire.Data.Clases
+@inject CatalogClient Catalogo
+@attribute [StreamRendering]
+
+<PageTitle>Productos e Inventario</PageTitle>
+
+<h1>Stock en Tiempo Real</h1>
+
+@if (info == null)
+{
+    <p><em>Cargando datos de microservicios...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Stock (desde Inventario)</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>@info.Id</td>
+                <td>@info.Nombre</td>
+                <td><span class="badge bg-success">@info.Existencias unidades</span></td>
+                <td>@info.Status</td>
+            </tr>
+        </tbody>
+    </table>
+}
+
+@code {
+    private ProductoInfo? info;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Testing with ID 10
+        //info = await Catalogo.GetProductoDetalleAsync(1);
+    }
+}

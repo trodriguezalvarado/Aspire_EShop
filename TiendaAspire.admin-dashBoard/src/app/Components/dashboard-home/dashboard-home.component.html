@@ -1,0 +1,23 @@
+<div class="portal-container">
+  <h1>Management Portal</h1>
+
+  <div class="cards-grid">
+    <!-- Inventory Card -->
+    <div class="card"
+         *ngIf="hasRole('Product_Manager')"
+         [routerLink]="['/inventario']"
+         style="cursor: pointer;">
+      <h3>Inventory Manager</h3>
+      <p>Manage full CRUD operations for warehouse stock.</p>
+    </div>
+
+    <!-- Catalog Card -->
+    <div class="card"
+         *ngIf="hasRole('Catalog_Manager')"
+         [routerLink]="['/catalogo']"
+         style="cursor: pointer;">
+      <h3>Catalog Manager</h3>
+      <p>Activate pending products and set public pricing.</p>
+    </div>
+  </div>
+</div>

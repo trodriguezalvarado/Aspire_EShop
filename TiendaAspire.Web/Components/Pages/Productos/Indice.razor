@@ -1,0 +1,52 @@
+﻿@page "/productos"
+@rendermode InteractiveServer
+@using TiendaAspire.Data.Clases
+@inject CatalogClient Catalogo
+@inject NavigationManager Nav
+
+<h3>Nuestros Productos</h3>
+@if (productos == null)
+{
+    <p><em>Cargando datos de microservicios...</em></p>
+}
+else
+{
+    if (productos.Count > 0)
+    {
+        <div class="row">
+            @foreach (var prod in productos)
+            {
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">@prod.Nombre</h5>
+                            <p>Precio: @prod.Existencias</p>
+                            <!-- Pasamos el GUID dinámicamente -->
+                            <button class="btn btn-primary" @onclick="() => VerDetalle(prod.Id)">
+                                Ver Detalles
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <p><em>No existen productos en este momento</em></p>
+        </div>
+    }
+}
+
+
+@code {
+    private List<ProductoInfo> productos;
+
+    protected override async Task OnInitializedAsync()
+    {
+        productos = await Catalogo.GetProductos() ?? new();
+    }
+
+    private void VerDetalle(Guid id) => Nav.NavigateTo($"/producto/{id}");
+}

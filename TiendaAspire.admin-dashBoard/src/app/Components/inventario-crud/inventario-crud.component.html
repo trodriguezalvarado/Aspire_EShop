@@ -1,0 +1,23 @@
+<div class="crud-container">
+  <h3>➕ Nuevo Producto</h3>
+  <input [(ngModel)]="nuevoProd.nombre" placeholder="Nombre">
+  <input [(ngModel)]="nuevoProd.cantidad" type="number" placeholder="Stock">
+  <button (click)='guardarNuevo()'>Crear en Inventario</button>
+
+  <hr>
+
+  <h3>📦 Existencias</h3>
+  <table border="1" width="100%">
+    <thead>
+      <tr><th>Nombre</th><th>Stock Actual</th><th>Acciones</th></tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let p of productos">
+        <td>{{ p.nombre }}</td>
+        <td><input type="number" [(ngModel)]="p.stock"></td>
+        <td><button (click)="actualizarStock(p)">Actualizar Stock</button></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+

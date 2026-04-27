@@ -1,0 +1,64 @@
+﻿services:
+  sql-server:
+    # Usa el nombre EXACTO que viste en el comando 'docker images'
+    image: mcr.microsoft.com/mssql/server:2022-latest 
+    environment:
+      - MSSQL_SA_PASSWORD=T34m0W2kRalperios*
+    ports:
+      - "1433:1433"    
+  keycloak:
+    # We only need to override the volume part
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+  redis:
+    image: redis:7.4
+  rabbitmq:
+    image: rabbitmq:3-management # Ya coincide con el original, pero asegura que no intente buscar otra
+  admin-dashboard:
+    # 1. ESTO VA DENTRO DEL SERVICIO (Configuración específica del contenedor)
+    volumes:
+      - ./TiendaAspire.admin-dashBoard/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+  inventario-api:
+    build:
+      context: .
+      dockerfile: InventarioService/Dockerfile
+    depends_on:
+      sql-server:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      - ConnectionStrings__inventorydb=Server=sql-server;Database=inventorydb;User Id=sa;Password=T34m0W2kRalperios*;TrustServerCertificate=True
+      - Aspire__RabbitMQ__Client__ConnectionString=amqp://guest:guest@rabbitmq:5672
+      
+      # --- AÑADE ESTAS LÍNEAS AQUÍ ---
+      - Authentication__Schemes__Bearer__Authority=http://keycloak:8080/realms/TiendaRealm
+      - Authentication__Schemes__Bearer__ValidIssuer=http://localhost:8081/realms/TiendaRealm
+      - Aspire__Keycloak__Client__AuthServerUrl=http://keycloak:8080
+      # Esta línea es vital para que .NET acepte HTTP (no seguro) para el Authority
+      - DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_HTTP2UNENCRYPTEDSUPPORT=true
+  catalogo-api:
+    build:
+      context: .
+      dockerfile: TiendaAspire.ApiService/Dockerfile
+    depends_on:
+      sql-server:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      - ConnectionStrings__inventorydb=Server=sql-server;Database=catalogdb;User Id=sa;Password=T34m0W2kRalperios*;TrustServerCertificate=True
+      - Aspire__RabbitMQ__Client__ConnectionString=amqp://guest:guest@rabbitmq:5672
+      
+      # --- AÑADE ESTAS LÍNEAS AQUÍ ---
+      - Authentication__Schemes__Bearer__Authority=http://keycloak:8080/realms/TiendaRealm
+      - Authentication__Schemes__Bearer__ValidIssuer=http://localhost:8081/realms/TiendaRealm
+      - Aspire__Keycloak__Client__AuthServerUrl=http://keycloak:8080
+      # Esta línea es vital para que .NET acepte HTTP (no seguro) para el Authority
+      - DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_HTTP2UNENCRYPTEDSUPPORT=true
+      - Aspire__StackExchange__Redis__ConnectionString=redis:6379
+
+volumes:
+  keycloak_data:
+    external: true
+    name: TiendaAspire.AppHost-keycloak-data # <--- REPLACE with your real volume name from 'docker volume ls'
