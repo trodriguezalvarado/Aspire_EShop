@@ -3,13 +3,14 @@
     # Usa el nombre EXACTO que viste en el comando 'docker images'
     image: mcr.microsoft.com/mssql/server:2022-latest 
     environment:
-      - MSSQL_SA_PASSWORD=T34m0W2kRalperios*
+      - MSSQL_SA_PASSWORD=${SQL_SA_PASSWORD}
     ports:
       - "1433:1433"    
   keycloak:
     # We only need to override the volume part
     volumes:
       - keycloak_data:/opt/keycloak/data
+      - ./tienda-realm-export.json:/opt/keycloak/data/import/realm.json:ro
   redis:
     image: redis:7.4
   rabbitmq:
@@ -28,8 +29,8 @@
       rabbitmq:
         condition: service_healthy
     environment:
-      - ConnectionStrings__inventorydb=Server=sql-server;Database=inventorydb;User Id=sa;Password=T34m0W2kRalperios*;TrustServerCertificate=True
-      - Aspire__RabbitMQ__Client__ConnectionString=amqp://guest:guest@rabbitmq:5672
+      - ConnectionStrings__inventorydb=${CONNECTION_SQL_INVENTARIO}
+      - Aspire__RabbitMQ__Client__ConnectionString=${CONNECTION_RABBITMQ}
       
       # --- AÑADE ESTAS LÍNEAS AQUÍ ---
       - Authentication__Schemes__Bearer__Authority=http://keycloak:8080/realms/TiendaRealm
@@ -47,8 +48,8 @@
       rabbitmq:
         condition: service_healthy
     environment:
-      - ConnectionStrings__inventorydb=Server=sql-server;Database=catalogdb;User Id=sa;Password=T34m0W2kRalperios*;TrustServerCertificate=True
-      - Aspire__RabbitMQ__Client__ConnectionString=amqp://guest:guest@rabbitmq:5672
+      - ConnectionStrings__inventorydb=$${CONNECTION_SQL_CATALOGO}
+      - Aspire__RabbitMQ__Client__ConnectionString=${CONNECTION_RABBITMQ}
       
       # --- AÑADE ESTAS LÍNEAS AQUÍ ---
       - Authentication__Schemes__Bearer__Authority=http://keycloak:8080/realms/TiendaRealm
