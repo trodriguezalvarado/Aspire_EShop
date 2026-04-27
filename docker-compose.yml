@@ -4,7 +4,7 @@ services:
     image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
       - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=T34m0W2kRalperios*
+      - MSSQL_SA_PASSWORD=${SQL_SA_PASSWORD}
     ports:
       - "1434:1433"
     healthcheck:
@@ -30,15 +30,24 @@ services:
       - "15672:15672"
 
   keycloak:
-    image: quay.io/keycloak/keycloak:26.0
-    command: start-dev
-    environment:
-      - KEYCLOAK_ADMIN=admin
-      - KEYCLOAK_ADMIN_PASSWORD=admin
-    ports:
-      - "8081:8080"
-    volumes:
-      - keycloak_data:/opt/keycloak/data # Persistencia de usuarios
+      image: quay.io/keycloak/keycloak:26.0
+      command: 
+        - start-dev 
+        - --import-realm  # <--- Este flag es vital para leer el JSON al arrancar
+      environment:
+        - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN_USER}
+        - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+        # En la v26 es recomendable forzar el hostname si usas Nginx
+        - KC_HOSTNAME_STRICT=false
+        - KC_HTTP_ENABLED=true
+      ports:
+        - "8081:8080"
+      volumes:
+        - keycloak_data:/opt/keycloak/data
+        # Inyectamos tu exportacion en la ruta que Keycloak 26 escanea por defecto
+        - ./tienda-realm-export.json:/opt/keycloak/data/import/realm.json:ro
+
+
   
 
   # Tus Microservicios
@@ -52,8 +61,8 @@ services:
         rabbitmq:
             condition: service_healthy
     environment:
-      - ConnectionStrings__inventorydb=Server=sql-server;Database=inventorydb;User Id=sa;Password=T34m0W2kRalperios*;TrustServerCertificate=True
-      - Aspire__RabbitMQ__Client__ConnectionString=amqp://guest:guest@rabbitmq:5672
+      - ConnectionStrings__inventorydb=${CONNECTION_SQL_INVENTARIO}
+      - Aspire__RabbitMQ__Client__ConnectionString=${CONNECTION_RABBITMQ}
       - Authentication__Schemes__Bearer__Authority=http://keycloak:8080/realms/TiendaRealm
       - DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_HTTP2UNENCRYPTEDSUPPORT=true
       - Aspire__StackExchange__Redis__ConnectionString=redis:6379
@@ -74,8 +83,8 @@ services:
         redis:
             condition: service_started
     environment:
-      - ConnectionStrings__catalogdb=Server=sql-server;Database=catalogdb;User Id=sa;Password=T34m0W2kRalperios*;TrustServerCertificate=True
-      - Aspire__RabbitMQ__Client__ConnectionString=amqp://guest:guest@rabbitmq:5672
+      - ConnectionStrings__catalogdb=${CONNECTION_SQL_CATALOGO}
+      - Aspire__RabbitMQ__Client__ConnectionString=${CONNECTION_RABBITMQ}
       - Authentication__Schemes__Bearer__Authority=http://keycloak:8080/realms/TiendaRealm
       - DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_HTTP2UNENCRYPTEDSUPPORT=true
     networks:
