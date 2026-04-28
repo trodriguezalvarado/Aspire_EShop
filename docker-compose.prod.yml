@@ -1,0 +1,152 @@
+services:
+  # 1. Close internal ports by removing the port mapping
+  sql-server:
+    volumes:
+      - ./sql-data:/var/opt/mssql/data # Maps SQL data to a local folder  
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 2G  # SQL needs more RAM
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  redis:
+    volumes:
+      - ./redis-data:/data # Maps Redis cache/state  
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 256M  # Redis es muy eficiente, con 256MB suele sobrar para caché
+        reservations:
+          memory: 64M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  rabbitmq:
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 1G    # RabbitMQ necesita más RAM para el panel de gestión y las colas
+        reservations:
+          memory: 256M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  keycloak:
+    volumes:
+      - ./keycloak-data:/opt/keycloak/data # Maps Keycloak users/settings
+      - ./tienda-realm-export.json:/opt/keycloak/data/import/realm.json:ro  
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 2G  # SQL needs more RAM
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    ports:
+      - "8081:8080" # Still needed for the browser login
+    environment:
+      - KC_HOSTNAME=${PRODUCTION_DOMAIN_OR_IP} # Needed for SSL/Production
+      - KC_HOSTNAME_STRICT=true
+
+  # 2. Map Dashboard and Web to standard ports (80/443)
+  admin-dashboard:
+    build:
+      args:
+        - BASE_HREF=/admin/ # This overrides the default for production        
+    restart: always
+    # --- Resource Limits ---
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'     # Limit to 50% of 1 CPU core
+          memory: 512M     # Limit to 512MB RAM
+        reservations:
+          memory: 128M     # Minimum guaranteed RAM
+    # --- Log Rotation ---
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"    # Maximum 10MB per log file
+        max-file: "3"      # Keep only the last 3 files
+
+  tienda-web:
+    restart: always
+    # --- Resource Limits ---
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'     # Limit to 50% of 1 CPU core
+          memory: 512M     # Limit to 512MB RAM
+        reservations:
+          memory: 128M     # Minimum guaranteed RAM
+    # --- Log Rotation ---
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"    # Maximum 10MB per log file
+        max-file: "3"      # Keep only the last 3 files
+  
+  # Creamos un servicio NGINX dedicado como ÚNICO punto de entrada
+  gateway-nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./TiendaAspire.admin-dashBoard/nginx.prod.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - admin-dashboard
+      - tienda-web
+    restart: always
+ 
+
+  # 3. Ensure APIs restart if the server reboots
+  inventario-api:
+    restart: always
+    # --- Resource Limits ---
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'     # Limit to 50% of 1 CPU core
+          memory: 512M     # Limit to 512MB RAM
+        reservations:
+          memory: 128M     # Minimum guaranteed RAM
+    # --- Log Rotation ---
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"    # Maximum 10MB per log file
+        max-file: "3"      # Keep only the last 3 files
+  
+  catalogo-api:
+    restart: always
+    # --- Resource Limits ---
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'     # Limit to 50% of 1 CPU core
+          memory: 512M     # Limit to 512MB RAM
+        reservations:
+          memory: 128M     # Minimum guaranteed RAM
+    # --- Log Rotation ---
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"    # Maximum 10MB per log file
+        max-file: "3"      # Keep only the last 3 files

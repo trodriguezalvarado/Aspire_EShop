@@ -6,19 +6,26 @@
       - MSSQL_SA_PASSWORD=${SQL_SA_PASSWORD}
     ports:
       - "1433:1433"    
+  
+  redis:
+    image: redis:7.4
+    ports:
+      - "6379:6379"
+
+  rabbitmq:
+    image: rabbitmq:3-management # Ya coincide con el original, pero asegura que no intente buscar otra
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
   keycloak:
-    # We only need to override the volume part
+    ports:
+        - "8081:8080"
     volumes:
       - keycloak_data:/opt/keycloak/data
       - ./tienda-realm-export.json:/opt/keycloak/data/import/realm.json:ro
-  redis:
-    image: redis:7.4
-  rabbitmq:
-    image: rabbitmq:3-management # Ya coincide con el original, pero asegura que no intente buscar otra
-  admin-dashboard:
-    # 1. ESTO VA DENTRO DEL SERVICIO (Configuración específica del contenedor)
-    volumes:
-      - ./TiendaAspire.admin-dashBoard/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+
+  
   inventario-api:
     build:
       context: .
@@ -58,6 +65,17 @@
       # Esta línea es vital para que .NET acepte HTTP (no seguro) para el Authority
       - DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_HTTP2UNENCRYPTEDSUPPORT=true
       - Aspire__StackExchange__Redis__ConnectionString=redis:6379
+
+  admin-dashboard:
+    ports:
+      - "5100:80"
+    # 1. ESTO VA DENTRO DEL SERVICIO (Configuración específica del contenedor)
+    volumes:
+      - ./TiendaAspire.admin-dashBoard/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+
+  tienda-web:
+    ports:
+      - "9000:80"  # Cambia el 8080 por el 80 que muestran los logs
 
 volumes:
   keycloak_data:
