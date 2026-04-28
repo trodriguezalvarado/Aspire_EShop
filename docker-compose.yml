@@ -5,8 +5,6 @@ services:
     environment:
       - ACCEPT_EULA=Y
       - MSSQL_SA_PASSWORD=${SQL_SA_PASSWORD}
-    ports:
-      - "1434:1433"
     healthcheck:
           test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'T34m0W2kRalperios*' -Q 'SELECT 1' -C"]
           interval: 10s
@@ -15,8 +13,6 @@ services:
 
   redis:
     image: redis:alpine
-    ports:
-      - "6379:6379"
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -25,9 +21,7 @@ services:
         interval: 10s
         timeout: 5s
         retries: 5
-    ports:
-      - "5672:5672"
-      - "15672:15672"
+    
 
   keycloak:
       image: quay.io/keycloak/keycloak:26.0
@@ -40,8 +34,7 @@ services:
         # En la v26 es recomendable forzar el hostname si usas Nginx
         - KC_HOSTNAME_STRICT=false
         - KC_HTTP_ENABLED=true
-      ports:
-        - "8081:8080"
+      
       volumes:
         - keycloak_data:/opt/keycloak/data
         # Inyectamos tu exportacion en la ruta que Keycloak 26 escanea por defecto
@@ -97,8 +90,7 @@ services:
     build:
       context: .
       dockerfile: TiendaAspire.admin-dashBoard/Dockerfile
-    ports:
-      - "5100:80"
+    
     depends_on:
       catalogo-api:
         condition: service_started
@@ -111,9 +103,6 @@ services:
     build:
       context: .
       dockerfile: TiendaAspire.Web/Dockerfile
-    ports:
-      - "9000:80"  # Cambia el 8080 por el 80 que muestran los logs
-     # - "8082:8080" # Access the store at http://localhost:8080
     environment:
       - services__catalogo-api__http__0=http://catalogo-api:80
       - services__catalogo-api__https__0=http://catalogo-api:80

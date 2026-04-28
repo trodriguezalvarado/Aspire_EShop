@@ -9,7 +9,7 @@ const routes: Routes = [
   { path: 'home', component: DashboardHomeComponent, canActivate: [AuthGuard] },
   { path: 'catalogo', component: CatalogoAdminComponent, canActivate: [AuthGuard], data: { roles: ['Product_Manager'] } },
   { path: 'inventario', component: InventarioCrudComponent, canActivate: [AuthGuard], data: { roles: ['Catalog_Manager'] } },
-  { path: '', redirectTo: '/home', pathMatch: 'full' }
+  { path: '', redirectTo: 'home', pathMatch: 'full' }
 ];
 
 @NgModule({

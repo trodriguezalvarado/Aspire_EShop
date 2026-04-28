@@ -16,12 +16,18 @@ COPY . .
 
 # 4. Move to the project folder and Publish
 WORKDIR "/src/InventarioService"
-RUN ls -R
 RUN dotnet publish "InventarioService.csproj" -c Release -o /app/publish /p:UseAppHost=false /p:ErrorOnDuplicatePublishOutputFiles=false
 
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS final
 
 WORKDIR /app
+
+# Required for Alpine to handle dates/currencies
+RUN apk add --no-cache icu-libs
+
+# Set the environment variable
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+
 COPY --from=build /app/publish .
 
 # Environment variables for the container

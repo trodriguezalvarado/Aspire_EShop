@@ -18,9 +18,16 @@ COPY . .
 WORKDIR "/src/TiendaAspire.ApiService"
 RUN dotnet publish "TiendaAspire.ApiService.csproj" -c Release -o /app/publish /p:UseAppHost=false /p:ErrorOnDuplicatePublishOutputFiles=false
 
-From mcr.microsoft.com/dotnet/aspnet:8.0 As final
+From mcr.microsoft.com/dotnet/aspnet:8.0-alpine As final
 
 WORKDIR /app
+
+# Required for Alpine to handle dates/currencies
+RUN apk add --no-cache icu-libs
+
+# Set the environment variable
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+
 COPY --from=build /app/publish .
 
 # Environment variables for the container
