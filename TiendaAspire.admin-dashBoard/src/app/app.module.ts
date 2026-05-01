@@ -16,7 +16,7 @@ export function initializeKeycloak(keycloak: KeycloakService) {
   return () =>
     keycloak.init({
       config: {
-        url: 'http://localhost:8081',
+        url: 'https://tutienda.duckdns.org/auth/',
         realm: 'TiendaRealm',
         clientId: 'admin-dashboard'
       },

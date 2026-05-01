@@ -56,7 +56,7 @@ services:
     environment:
       - ConnectionStrings__inventorydb=${CONNECTION_SQL_INVENTARIO}
       - Aspire__RabbitMQ__Client__ConnectionString=${CONNECTION_RABBITMQ}
-      - Authentication__Schemes__Bearer__Authority=http://keycloak:8080/realms/TiendaRealm
+      - Authentication__Schemes__Bearer__Authority=${Authentication__Schemes__Bearer__Authority}
       - DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_HTTP2UNENCRYPTEDSUPPORT=true
       - Aspire__StackExchange__Redis__ConnectionString=redis:6379
     networks:
@@ -78,8 +78,9 @@ services:
     environment:
       - ConnectionStrings__catalogdb=${CONNECTION_SQL_CATALOGO}
       - Aspire__RabbitMQ__Client__ConnectionString=${CONNECTION_RABBITMQ}
-      - Authentication__Schemes__Bearer__Authority=http://keycloak:8080/realms/TiendaRealm
+      - Authentication__Schemes__Bearer__Authority=${Authentication__Schemes__Bearer__Authority}
       - DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_HTTP2UNENCRYPTEDSUPPORT=true
+      - Aspire__StackExchange__Redis__ConnectionString=redis:6379
     networks:
       default:
         aliases:
