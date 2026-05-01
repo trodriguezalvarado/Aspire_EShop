@@ -1,3 +1,15 @@
+# Production Data (Persistence)
+**/sql-data/
+**/keycloak-data/
+**/redis-data/
+
+# Environment Secrets
+.env
+.env.prod
+
+# SSL Certificates (if you have them inside the repo folder)
+nginx-ssl/
+
 # === [ .NET / ASPIRE ] ===
 **/bin/
 **/obj/
