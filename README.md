@@ -36,10 +36,10 @@ Esta secci贸n destaca la resoluci贸n de problemas reales durante el desarrollo:
   - Modificar el archivo environment.ts
   - Localizar el archivo keycloakUrl: '...'
   - cambiar por keycloakUrl: 'htttp://ALIAS/auth' (donde ALIAS es el mismo creado en el paso 3)
-  - Crear el archivo .env, en la raiz de la soluci髇, en el archivo DEPLOMENT.md hay una secci髇 con las variables a definir, en el caso de la varable HOSTNAME debe tener como valor el ALIAS definido.
-3. Ejecutar el comando:
+  - Crear el archivo .env, en la raiz de la soluci贸n, en el archivo DEPLOMENT.md hay una secci贸n con las variables a definir, en el caso de la varable HOSTNAME debe tener como valor el ALIAS definido.
+5. Ejecutar el comando:
    ```bash
    docker-compose up -d
    ```
-4. Acceder al dashboard administrativo en `http://localhost:5100`.
+6. Acceder al dashboard administrativo en `http://localhost:5100`.
 
