@@ -5,6 +5,8 @@ services:
     environment:
       - ACCEPT_EULA=Y
       - MSSQL_SA_PASSWORD=${SQL_SA_PASSWORD}
+    volumes:
+      - sql_data:/var/opt/mssql
     healthcheck:
           test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'T34m0W2kRalperios*' -Q 'SELECT 1' -C"]
           interval: 10s
@@ -34,6 +36,7 @@ services:
         # En la v26 es recomendable forzar el hostname si usas Nginx
         - KC_HOSTNAME_STRICT=false
         - KC_HTTP_ENABLED=true
+        - KC_PROXY_HEADERS=xforwarded
       
       volumes:
         - keycloak_data:/opt/keycloak/data
@@ -98,9 +101,9 @@ services:
       inventario-api:
         condition: service_started
     environment:
-      - KEYCLOAK_URL=http://keycloak:8080
+      - KEYCLOAK_URL=${KEYCLOAK_URL}
 
-  tienda-web:
+  tienda-web:    
     build:
       context: .
       dockerfile: TiendaAspire.Web/Dockerfile
@@ -116,5 +119,6 @@ services:
 
 volumes:
   keycloak_data: # Definiciode volumen persistente
-  dataprotection-keys:
+  sql_data:
+  dataprotection-keys:  
   

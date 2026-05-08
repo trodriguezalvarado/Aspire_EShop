@@ -10,13 +10,14 @@ import { FormsModule } from '@angular/forms';
 import { CatalogoAdminComponent } from './Components/catalogo-admin/catalogo-admin.component';
 import { InventarioCrudComponent } from './Components/inventario-crud/inventario-crud.component';
 import { DashboardHomeComponent } from './Components/dashboard-home/dashboard-home.component';
+import { environment  } from './environments/environment';
 
 
 export function initializeKeycloak(keycloak: KeycloakService) {
   return () =>
     keycloak.init({
       config: {
-        url: 'https://tutienda.duckdns.org/auth/',
+        url: environment.keycloakUrl,
         realm: 'TiendaRealm',
         clientId: 'admin-dashboard'
       },
