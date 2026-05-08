@@ -3,7 +3,8 @@ FROM node:18-alpine as build
 WORKDIR /app
 
 # Add this line to accept the variable
-ARG BASE_HREF=/
+ARG CONFIGURATION=development 
+ARG BASE_HREF=/admin/
 
 # Copy package files and install dependencies
 COPY TiendaAspire.admin-dashBoard/package*.json ./
@@ -11,7 +12,7 @@ RUN npm install --legacy-peer-deps
 
 # Copy the rest of the code and build for production
 COPY TiendaAspire.admin-dashBoard/ .
-RUN npx ng build --configuration production --base-href ${BASE_HREF}
+RUN npx ng build --configuration ${CONFIGURATION} --base-href ${BASE_HREF}
 
 # Stage 2: Serve the app with Nginx
 FROM nginx:alpine

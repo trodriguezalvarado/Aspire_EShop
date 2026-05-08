@@ -30,6 +30,13 @@ Esta sección destaca la resolución de problemas reales durante el desarrollo:
 ## 📦 Cómo ejecutar localmente
 1. Clonar el repositorio.
 2. Asegurarse de tener Docker Desktop iniciado.
+3. Crear un alias en el archivo host o dns local
+4. Configurar el admin dashboard
+  - Moverse a la carpeta TiendaAspire.admin-dashBoard/src/environments/
+  - Modificar el archivo environment.ts
+  - Localizar el archivo keycloakUrl: '...'
+  - cambiar por keycloakUrl: 'htttp://ALIAS/auth' (donde ALIAS es el mismo creado en el paso 3)
+  - Crear el archivo .env, en la raiz de la soluci�n, en el archivo DEPLOMENT.md hay una secci�n con las variables a definir, en el caso de la varable HOSTNAME debe tener como valor el ALIAS definido.
 3. Ejecutar el comando:
    ```bash
    docker-compose up -d

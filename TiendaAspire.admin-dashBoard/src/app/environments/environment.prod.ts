@@ -1,7 +1,6 @@
 export const environment = {
-  production: false,
-  keycloakUrl: 'http://tiendalocal/auth',
+  production: true,
+  keycloakUrl: 'http://tutienda.duckdns.org/auth',
   catalogoUrl: '/api/catalogo',
   inventarioUrl: '/api/inventario'
 };
-

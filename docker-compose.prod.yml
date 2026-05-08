@@ -73,7 +73,8 @@ services:
   admin-dashboard:
     build:
       args:
-        - BASE_HREF=/admin/ # This overrides the default for production        
+        - BASE_HREF=/admin/ # This overrides the default for production     
+        - CONFIGURATION=production 
     environment:
       # Pasamos la variable del .env al contenedor
       - KEYCLOAK_URL=${KEYCLOAK_URL}

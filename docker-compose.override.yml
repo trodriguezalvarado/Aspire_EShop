@@ -1,83 +1,63 @@
 ﻿services:
   sql-server:
-    # Usa el nombre EXACTO que viste en el comando 'docker images'
     image: mcr.microsoft.com/mssql/server:2022-latest 
     environment:
       - MSSQL_SA_PASSWORD=${SQL_SA_PASSWORD}
-    ports:
-      - "1433:1433"    
   
   redis:
     image: redis:7.4
-    ports:
-      - "6379:6379"
 
   rabbitmq:
-    image: rabbitmq:3-management # Ya coincide con el original, pero asegura que no intente buscar otra
-    ports:
-      - "5672:5672"
-      - "15672:15672"
+    image: rabbitmq:3-management 
 
   keycloak:
+    networks:
+      default:
+        aliases:
+          - localhost
     ports:
         - "8081:8080"
+    environment:
+      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN_USER}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+      - KC_HOSTNAME=${KC_HOSTNAME}
+      - KC_HTTP_RELATIVE_PATH=${KC_HTTP_RELATIVE_PATH}
+      - KC_PROXY_HEADERS=xforwarded
+      - KC_HOSTNAME_STRICT=${KC_HOSTNAME_STRICT}
+      - KC_HTTP_ENABLED=true
+      - KC_HOSTNAME_STRICT_HTTPS=${KC_HOSTNAME_STRICT_HTTPS}
+      
     volumes:
       - keycloak_data:/opt/keycloak/data
       - ./tienda-realm-export.json:/opt/keycloak/data/import/realm.json:ro
 
+  gateway-nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80" 
+    networks:
+      default:
+        aliases:
+          - localhost
+    volumes:
+      - ./TiendaAspire.admin-dashBoard/nginx.localalias.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - admin-dashboard
+      - tienda-web
   
   inventario-api:
-    build:
-      context: .
-      dockerfile: InventarioService/Dockerfile
-    depends_on:
-      sql-server:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-    environment:
-      - ConnectionStrings__inventorydb=${CONNECTION_SQL_INVENTARIO}
-      - Aspire__RabbitMQ__Client__ConnectionString=${CONNECTION_RABBITMQ}
-      
-      # --- AÑADE ESTAS LÍNEAS AQUÍ ---
-      - Authentication__Schemes__Bearer__Authority=http://keycloak:8080/realms/TiendaRealm
-      - Authentication__Schemes__Bearer__ValidIssuer=http://localhost:8081/realms/TiendaRealm
-      - Aspire__Keycloak__Client__AuthServerUrl=http://keycloak:8080
-      # Esta línea es vital para que .NET acepte HTTP (no seguro) para el Authority
-      - DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_HTTP2UNENCRYPTEDSUPPORT=true
+    extra_hosts:
+      - ${HOSTNAME}:host-gateway
+ 
   catalogo-api:
+     extra_hosts:
+      - ${HOSTNAME}:host-gateway
+
+  admin-dashboard: 
     build:
-      context: .
-      dockerfile: TiendaAspire.ApiService/Dockerfile
-    depends_on:
-      sql-server:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
+      args:
+        - BASE_HREF=/admin/
+        - CONFIGURATION=development
     environment:
-      - ConnectionStrings__inventorydb=$${CONNECTION_SQL_CATALOGO}
-      - Aspire__RabbitMQ__Client__ConnectionString=${CONNECTION_RABBITMQ}
-      
-      # --- AÑADE ESTAS LÍNEAS AQUÍ ---
-      - Authentication__Schemes__Bearer__Authority=http://keycloak:8080/realms/TiendaRealm
-      - Authentication__Schemes__Bearer__ValidIssuer=http://localhost:8081/realms/TiendaRealm
-      - Aspire__Keycloak__Client__AuthServerUrl=http://keycloak:8080
-      # Esta línea es vital para que .NET acepte HTTP (no seguro) para el Authority
-      - DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_HTTP2UNENCRYPTEDSUPPORT=true
-      - Aspire__StackExchange__Redis__ConnectionString=redis:6379
-
-  admin-dashboard:
-    ports:
-      - "5100:80"
-    # 1. ESTO VA DENTRO DEL SERVICIO (Configuración específica del contenedor)
-    volumes:
-      - ./TiendaAspire.admin-dashBoard/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-
-  tienda-web:
-    ports:
-      - "9000:80"  # Cambia el 8080 por el 80 que muestran los logs
-
-volumes:
-  keycloak_data:
-    external: true
-    name: TiendaAspire.AppHost-keycloak-data # <--- REPLACE with your real volume name from 'docker volume ls'
+      - KEYCLOAK_URL=${KEYCLOAK_URL}
+    
