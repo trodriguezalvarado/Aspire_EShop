@@ -1,7 +1,7 @@
 ﻿namespace TiendaAspire.Data.Clases
 {
     public record ProductoInfo(Guid Id, string Nombre, int Existencias, string Status);
-    public record ProductoCatalogoResponse(Guid Id, string Nombre, int Existencias, decimal? precio);
+    public record ProductoCatalogoResponse(Guid Id, string Nombre, int Existencias, decimal? precio, string Status);
     public record StockUpdatedEvent(Guid CodigoUnico, string Nombre, int Cantidad);
 
 

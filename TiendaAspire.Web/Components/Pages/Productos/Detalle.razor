@@ -14,13 +14,14 @@ else
         <p><strong>Identificador Único:</strong> @Id</p>
         <p><strong>Stock disponible:</strong> @producto.Existencias</p>
         <p><strong>Stock disponible:</strong> @producto.Status</p>
+        <p><strong>Precio:</strong> @producto.precio</p>
         <button class="btn btn-secondary" onclick="history.back()">Volver</button>
     </div>
 }
 
 @code {
     [Parameter] public Guid Id { get; set; }
-    private ProductoInfo? producto;
+    private ProductoCatalogoResponse? producto;
 
     protected override async Task OnParametersSetAsync()
     {

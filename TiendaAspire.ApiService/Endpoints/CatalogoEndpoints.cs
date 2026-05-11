@@ -3,6 +3,7 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.IdentityModel.Tokens;
 using System.Text.Json;
 using TiendaAspire.ApiService.Data;
+using TiendaAspire.ApiService.Data.Models;
 using TiendaAspire.Data.Clases;
 
 namespace TiendaAspire.ApiService.Endpoints
@@ -19,7 +20,7 @@ namespace TiendaAspire.ApiService.Endpoints
                 for (int i = 0; i < productos.Count; i++)
                 {
                     var producto = productos[i];
-                    productosResponse.Add(new ProductoCatalogoResponse(producto.CodigoUnico, producto.Nombre, producto.Stock, producto.Precio));
+                    productosResponse.Add(new ProductoCatalogoResponse(producto.CodigoUnico, producto.Nombre, producto.Stock, producto.Precio, ""));
                 }
                 return Results.Ok(productosResponse);
 
@@ -32,7 +33,7 @@ namespace TiendaAspire.ApiService.Endpoints
                 for (int i = 0; i < productosPendientes.Count; i++)
                 {
                     var producto = productosPendientes[i];
-                    productosResponse.Add(new ProductoCatalogoResponse(producto.CodigoUnico, producto.Nombre, producto.Stock, producto.Precio));
+                    productosResponse.Add(new ProductoCatalogoResponse(producto.CodigoUnico, producto.Nombre, producto.Stock, producto.Precio, ""));
                 }
                 return Results.Ok(productosResponse);
             }).RequireAuthorization(policy => policy.RequireRole("Catalog_Manager"));
@@ -45,8 +46,8 @@ namespace TiendaAspire.ApiService.Endpoints
                 var cached = await cache.GetStringAsync(cacheKey);
                 if (!string.IsNullOrEmpty(cached))
                 {
-                    var cachedproducto = JsonSerializer.Deserialize<Producto>(cached);
-                    var info = new ProductoInfo(cachedproducto.CodigoUnico, cachedproducto.Nombre, cachedproducto.Stock, "Producto obtenido desde cache");                   
+                    var cachedproducto = JsonSerializer.Deserialize<ProductoCatalogo>(cached);
+                    var info = new ProductoCatalogoResponse(cachedproducto.CodigoUnico, cachedproducto.Nombre, cachedproducto.Stock, cachedproducto.Precio,"Producto obtenido desde cache");                   
                     return Results.Ok(info);
                 }
 
@@ -57,7 +58,7 @@ namespace TiendaAspire.ApiService.Endpoints
                 {
                     // Sync with Redis
                     await cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(producto));
-                    var info = new ProductoInfo(producto.CodigoUnico, producto.Nombre, producto.Stock, "Producto obtenido desde bd local, actualizada desde Inventario");
+                    var info = new ProductoCatalogoResponse(producto.CodigoUnico, producto.Nombre, producto.Stock, producto.Precio,"Producto obtenido desde bd local, actualizada desde Inventario");
                     return Results.Ok(info);
                 }
 

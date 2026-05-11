@@ -5,14 +5,14 @@ namespace TiendaAspire.Web
 {
     public class CatalogClient(HttpClient httpClient)
     {
-        public async Task<List<ProductoInfo>> GetProductos()
+        public async Task<List<ProductoCatalogoResponse>> GetProductos()
         {
-            return await httpClient.GetFromJsonAsync<List<ProductoInfo>>("/catalogo");
+            return await httpClient.GetFromJsonAsync<List<ProductoCatalogoResponse>>("/catalogo");
         }
-        public async Task<ProductoInfo?> GetProductoDetalleAsync(Guid id)
+        public async Task<ProductoCatalogoResponse?> GetProductoDetalleAsync(Guid id)
         {
             // Calling our catalog endpoint that joins with inventory
-            return await httpClient.GetFromJsonAsync<ProductoInfo>($"/catalogo/{id}");
+            return await httpClient.GetFromJsonAsync<ProductoCatalogoResponse>($"/catalogo/{id}");
         }
     }
 

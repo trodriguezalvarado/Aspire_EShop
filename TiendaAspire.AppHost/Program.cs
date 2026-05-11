@@ -2,7 +2,8 @@ var builder = DistributedApplication.CreateBuilder(args);
 
 var cache = builder.AddRedis("cache");
 
-var sql = builder.AddSqlServer("sqlserver");
+var sql = builder.AddSqlServer("sqlserver")
+    .WithDataVolume(); 
 
 // 1. Agregar RabbitMQ
 var messaging = builder.AddRabbitMQ("messaging");
