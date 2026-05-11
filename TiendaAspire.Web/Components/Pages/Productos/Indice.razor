@@ -20,7 +20,8 @@ else
                     <div class="card">
                         <div class="card-body">
                             <h5 class="card-title">@prod.Nombre</h5>
-                            <p>Precio: @prod.pre</p>
+                            <p>precio: @prod.precio</p>
+                            <p>Existencias: @prod.Existencias</p>
                             <!-- Pasamos el GUID dinámicamente -->
                             <button class="btn btn-primary" @onclick="() => VerDetalle(prod.Id)">
                                 Ver Detalles
@@ -41,7 +42,7 @@ else
 
 
 @code {
-    private List<ProductoInfo> productos;
+    private List<ProductoCatalogoResponse> productos;
 
     protected override async Task OnInitializedAsync()
     {
