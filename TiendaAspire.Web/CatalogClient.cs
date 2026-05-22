@@ -3,7 +3,7 @@ using TiendaAspire.Data.Clases;
 
 namespace TiendaAspire.Web
 {
-    public class CatalogClient(HttpClient httpClient)
+    public class CatalogClient(HttpClient httpClient )
     {
         public async Task<List<ProductoCatalogoResponse>> GetProductos()
         {

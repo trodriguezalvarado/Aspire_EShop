@@ -9,5 +9,8 @@ namespace TiendaAspire.ApiService.Data.Models
         public string Nombre { get; set; } = string.Empty;
         public int Stock { get; set; }
         public decimal? Precio { get; set; }
+        [NotMapped]
+        public string CacheKey { get => $"product-{CodigoUnico}"; }
+        public static string CacheKeyBuilder(Guid CodigoUnico) => $"product-{CodigoUnico}";
     }
 }

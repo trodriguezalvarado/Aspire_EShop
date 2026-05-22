@@ -6,6 +6,7 @@ using InventarioService.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Channels;
 using System.Security.Claims;
+using Dapr.Client;
 
 namespace InventarioService.Endpoints
 {
@@ -35,7 +36,7 @@ namespace InventarioService.Endpoints
                     : Results.NotFound(new { Message = $"Stock con código {codigoUnico} no encontrado." });
             }).RequireAuthorization(policy => policy.RequireRole("Product_Manager"));
 
-            group.MapPost("/", async (StockInput input, InventarioDbContext db, IConnection rabbitConnection) =>
+            group.MapPost("/", async (StockInput input, InventarioDbContext db, DaprClient daprClient) =>
             {
                 var nuevoStock = new Producto
                 {
@@ -46,33 +47,35 @@ namespace InventarioService.Endpoints
 
                 db.Stocks.Add(nuevoStock);
                 await db.SaveChangesAsync();
-                try
-                {
-                    using var channel = rabbitConnection.CreateModel();
-                    channel.QueueDeclare(queue: "stock_updates",
-                                 durable: true,
-                                 exclusive: false,
-                                 autoDelete: false);
-                    var messagePayload = new StockUpdatedEvent(nuevoStock.CodigoUnico, nuevoStock.Nombre, nuevoStock.Stock);
-                    var messageJson = JsonSerializer.Serialize(messagePayload);
-                    var body = Encoding.UTF8.GetBytes(messageJson);
-                    channel.BasicPublish(exchange: string.Empty,
-                                 routingKey: "stock_updates",
-                                 body: body);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error enviando mensaje: {ex.Message}");
-                    return Results.Accepted($"/stock/{nuevoStock.CodigoUnico}", new { nuevoStock, Warning = "Stock guardado pero notificación de red pendiente." });
-                }
+                await daprClient.PublishEventAsync("rabbit-pubsub", "stockUpdated", nuevoStock);
+                //try
+                //{
+                    
+                //    using var channel = rabbitConnection.CreateModel();
+                //    channel.QueueDeclare(queue: "stock_updates",
+                //                 durable: true,
+                //                 exclusive: false,
+                //                 autoDelete: false);
+                //    var messagePayload = new StockUpdatedEvent(nuevoStock.CodigoUnico, nuevoStock.Nombre, nuevoStock.Stock);
+                //    var messageJson = JsonSerializer.Serialize(messagePayload);
+                //    var body = Encoding.UTF8.GetBytes(messageJson);
+                //    channel.BasicPublish(exchange: string.Empty,
+                //                 routingKey: "stock_updates",
+                //                 body: body);
+                //}
+                //catch (Exception ex)
+                //{
+                //    Console.WriteLine($"Error enviando mensaje: {ex.Message}");
+                //    return Results.Accepted($"/stock/{nuevoStock.CodigoUnico}", new { nuevoStock, Warning = "Stock guardado pero notificación de red pendiente." });
+                //}
                 
 
                 // The URL now matches the GUID pattern
                 return Results.Created($"/stock/{nuevoStock.CodigoUnico}", nuevoStock);
-            }).RequireAuthorization(policy => policy.RequireRole("Product_Manager"));
+            }).RequireAuthorization(policy => policy.RequireRole("Product_Manager")).WithName("CrearProducto");
 
             //Actualización
-            group.MapPut("/{id:guid}", async (Guid id, StockInput dto, InventarioDbContext db, IConnection rabbitConnection) =>
+            group.MapPut("/{id:guid}", async (Guid id, StockInput dto, InventarioDbContext db, DaprClient daprClient) =>
             {
                 var producto = await db.Stocks.FirstAsync(p => p.CodigoUnico == id);
                 if (producto is null) return Results.NotFound();
@@ -80,21 +83,23 @@ namespace InventarioService.Endpoints
                 producto.Stock = dto.Cantidad;
                 await db.SaveChangesAsync();
 
+                await daprClient.PublishEventAsync("rabbit-pubsub", "stockUpdated", producto);
+
                 // Notificar al catálogo que el stock cambió
-                using var channel = rabbitConnection.CreateModel();
-                channel.QueueDeclare(queue: "stock_updates",
-                             durable: true,
-                             exclusive: false,
-                             autoDelete: false);
-                var messagePayload = new StockUpdatedEvent(producto.CodigoUnico, producto.Nombre, producto.Stock);
-                var messageJson = JsonSerializer.Serialize(messagePayload);
-                var body = Encoding.UTF8.GetBytes(messageJson);
-                channel.BasicPublish(exchange: string.Empty,
-                             routingKey: "stock_updates",
-                             body: body);
+                //using var channel = rabbitConnection.CreateModel();
+                //channel.QueueDeclare(queue: "stock_updates",
+                //             durable: true,
+                //             exclusive: false,
+                //             autoDelete: false);
+                //var messagePayload = new StockUpdatedEvent(producto.CodigoUnico, producto.Nombre, producto.Stock);
+                //var messageJson = JsonSerializer.Serialize(messagePayload);
+                //var body = Encoding.UTF8.GetBytes(messageJson);
+                //channel.BasicPublish(exchange: string.Empty,
+                //             routingKey: "stock_updates",
+                //             body: body);
 
                 return Results.NoContent();
-            }).RequireAuthorization(policy => policy.RequireRole("Product_Manager"));
+            }).RequireAuthorization(policy => policy.RequireRole("Product_Manager")).WithName("ActualizarProducto");
         }
     }
 }

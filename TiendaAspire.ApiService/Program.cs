@@ -56,12 +56,7 @@ builder.Services.AddHttpClient("InventarioClient", static client =>
 builder.AddRedisDistributedCache("cache");
 
 builder.AddSqlServerDbContext<CatalogoDbContext>("catalogdb");
-builder.AddRabbitMQClient("messaging", settings =>
-{
-    settings.DisableHealthChecks = true;
-    settings.ConnectionString = settings.ConnectionString?.Replace("amqps://", "amqp://");
-}); // The Aspire component
-builder.Services.AddHostedService<StockUpdateWorker>();
+builder.Services.AddDaprClient();
 
 builder.Services.AddCors(options =>
 {
@@ -94,10 +89,15 @@ builder.Services.AddAuthentication()
             ValidateLifetime = true
         };
     });
-
+builder.Services.ConfigureHttpJsonOptions(options => {
+    options.SerializerOptions.PropertyNameCaseInsensitive = true;
+});
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
+
+app.UseCloudEvents();          // Unwraps the Dapr CloudEvent JSON metadata envelope
+app.MapSubscribeHandler();     // Allows Dapr to auto-discover your subscription endpoints
 
 if (app.Environment.IsDevelopment())
 {
