@@ -37,8 +37,10 @@ builder.Services.AddHttpClient<CatalogClient>(client =>
 {
     // 1. Point the base address directly to your local Dapr sidecar endpoint port
     // (Aspire sets the DAPR_HTTP_PORT variable automatically)
-    var daprHttpPort = Environment.GetEnvironmentVariable("DAPR_HTTP_PORT") ?? "3500";
-    client.BaseAddress = new Uri($"http://localhost:{daprHttpPort}/");
+    var daprEndpoint = Environment.GetEnvironmentVariable("DAPR_HTTP_ENDPOINT")
+                       ?? $"http://localhost:{Environment.GetEnvironmentVariable("DAPR_HTTP_PORT") ?? "3500"}/";
+    
+    client.BaseAddress = new Uri(daprEndpoint);
 
     // 2. THE FIX: Force the explicit Dapr destination App ID into the request headers
     // This tells the Dapr sidecar EXACTLY which microservice must receive the request

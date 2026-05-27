@@ -15,15 +15,20 @@ services:
 
   redis:
     image: redis:alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   rabbitmq:
     image: rabbitmq:3-management
     healthcheck:
-        test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
-        interval: 10s
-        timeout: 5s
-        retries: 5
-    
+      # This command explicitly checks if the internal broker nodes and core applications are fully running
+      test: ["CMD-SHELL", "rabbitmq-diagnostics check_running && rabbitmq-diagnostics check_local_alarms"]
+      interval: 5s   # Check every 5 seconds instead of 10 to speed up your boot
+      timeout: 5s
+      retries: 6
 
   keycloak:
       image: quay.io/keycloak/keycloak:26.0
@@ -61,7 +66,11 @@ services:
       - Aspire__RabbitMQ__Client__ConnectionString=${CONNECTION_RABBITMQ}
       - Authentication__Schemes__Bearer__Authority=${Authentication__Schemes__Bearer__Authority}
       - DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_HTTP2UNENCRYPTEDSUPPORT=true
-      - Aspire__StackExchange__Redis__ConnectionString=redis:6379
+      #- Aspire__StackExchange__Redis__ConnectionString=redis:6379
+      - DAPR_HTTP_PORT=3500
+      - DAPR_GRPC_PORT=50001
+      - DAPR_GRPC_ENDPOINT=http://inventario-api-dapr:50001
+      - ASPNETCORE_HTTP_PORTS=8080
     networks:
       default:
         aliases:
@@ -83,7 +92,11 @@ services:
       - Aspire__RabbitMQ__Client__ConnectionString=${CONNECTION_RABBITMQ}
       - Authentication__Schemes__Bearer__Authority=${Authentication__Schemes__Bearer__Authority}
       - DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_HTTP2UNENCRYPTEDSUPPORT=true
-      - Aspire__StackExchange__Redis__ConnectionString=redis:6379
+      #- Aspire__StackExchange__Redis__ConnectionString=redis:6379
+      - DAPR_HTTP_PORT=3500
+      - DAPR_GRPC_PORT=50001
+      - DAPR_GRPC_ENDPOINT=http://catalogo-api-dapr:50001
+      - ASPNETCORE_HTTP_PORTS=8080
     networks:
       default:
         aliases:
@@ -108,8 +121,10 @@ services:
       context: .
       dockerfile: TiendaAspire.Web/Dockerfile
     environment:
-      - services__catalogo-api__http__0=http://catalogo-api:80
-      - services__catalogo-api__https__0=http://catalogo-api:80
+      - DAPR_HTTP_PORT=3500
+      - DAPR_HTTP_ENDPOINT=http://tienda-web-dapr:3500
+      # - services__catalogo-api__http__0=http://catalogo-api:80
+      # - services__catalogo-api__https__0=http://catalogo-api:80
     depends_on:
       - catalogo-api
     volumes:

@@ -6,9 +6,14 @@
   
   redis:
     image: redis:7.4
+    ports:
+      - "6379:6379"
 
   rabbitmq:
     image: rabbitmq:3-management 
+    ports:
+      - "5672:5672"
+      - "15672:15672"
 
   keycloak:
     networks:
@@ -30,6 +35,71 @@
     volumes:
       - keycloak_data:/opt/keycloak/data
       - ./tienda-realm-export.json:/opt/keycloak/data/import/realm.json:ro
+
+  inventario-api-dapr:
+    image: "daprio/daprd:1.14.4"
+    command: [
+      "./daprd",
+      "--app-id", "inventarioservice",
+      "--app-port", "80", 
+      "--app-channel-address", "inventario-api",
+      "--dapr-http-port", "3500",
+      "--dapr-grpc-port", "50001",
+      "--resources-path", "/components"
+    ]
+    networks:
+      default:
+        aliases:
+          - inventarioservice-dapr
+    volumes:
+      # Mount your global dapr components directory right into the sidecar container
+      - ~/.dapr/components:/components:ro 
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      inventario-api:
+        condition: service_started
+
+  catalogo-api-dapr:
+    image: "daprio/daprd:1.14.4"
+    command: [
+      "./daprd",
+      "--app-id", "catalogoservice",
+      "--app-port", "80",
+      "--app-channel-address", "catalogo-api",
+      "--dapr-http-port", "3500",
+      "--dapr-grpc-port", "50001",
+      "--resources-path", "/components",
+    ]
+    networks:
+      default:
+        aliases:
+          - catalogoservice-dapr
+    volumes:
+      - ~/.dapr/components:/components:ro
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      catalogo-api:
+        condition: service_started
+
+  tienda-web-dapr:
+    image: "daprio/daprd:1.14.4"
+    command: [
+      "./daprd",
+      "--app-id", "webfrontend",
+      "--app-port", "80",
+      "--app-channel-address", "tienda-web",
+      "--dapr-http-port", "3500",
+      "--resources-path", "/components",
+    ]
+    volumes:
+      - ~/.dapr/components:/components:ro
+    depends_on:
+      tienda-web:
+        condition: service_started
 
   gateway-nginx:
     image: nginx:alpine
@@ -60,4 +130,5 @@
         - CONFIGURATION=development
     environment:
       - KEYCLOAK_URL=${KEYCLOAK_URL}
+
     
