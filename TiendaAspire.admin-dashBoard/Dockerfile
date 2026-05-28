@@ -12,7 +12,8 @@ RUN npm install --legacy-peer-deps
 
 # Copy the rest of the code and build for production
 COPY TiendaAspire.admin-dashBoard/ .
-RUN node ./node_modules/@angular/cli/bin/ng build --configuration=${CONFIGURATION} --base-href=${BASE_HREF}
+
+RUN npm run build -- --configuration=${CONFIGURATION} --base-href=${BASE_HREF}
 
 # Stage 2: Serve the app with Nginx
 FROM nginx:alpine
@@ -25,7 +26,7 @@ RUN mkdir -p /usr/share/nginx/html/admin
 
 # Copy the build output from the first stage
 # Note: Check your 'angular.json' to confirm the output path (usually dist/project-name)
-COPY --from=build /app/dist/tienda-aspire.admin-dash-board /usr/share/nginx/html/admin
+COPY --from=build /app/dist/tienda-aspire.admin-dash-board/. /usr/share/nginx/html/admin/
 
 # Copy a custom Nginx config to handle Angular routing
 COPY TiendaAspire.admin-dashBoard/nginx.conf /etc/nginx/conf.d/default.conf

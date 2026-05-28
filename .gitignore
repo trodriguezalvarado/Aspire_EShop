@@ -68,3 +68,7 @@ Thumbs.db
 # Archivos temporales del AppHost
 **/AppHost/obj/
 **/AppHost/bin/
+
+# --- ADD THIS WHITELIST EXCEPTION ROW ---
+!**/src/environments/
+!**/src/environments/*
