@@ -53,7 +53,7 @@
           - inventarioservice-dapr
     volumes:
       # Mount your global dapr components directory right into the sidecar container
-      - ~/.dapr/components:/components:ro 
+      - ./dapr/components-local:/components:ro 
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -76,7 +76,7 @@
         aliases:
           - catalogoservice-dapr
     volumes:
-      - ~/.dapr/components:/components:ro
+      - ./dapr/components-local:/components:ro
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -127,7 +127,7 @@
     build:
       args:
         - BASE_HREF=/admin/
-        - CONFIGURATION=development
+        - CONFIGURATION=localdeployment
     environment:
       - KEYCLOAK_URL=${KEYCLOAK_URL}
 

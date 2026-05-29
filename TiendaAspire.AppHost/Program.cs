@@ -58,37 +58,6 @@ var inventario = builder.
 
            envContext.EnvironmentVariables["RABBITMQ_URI"] = $"amqp://guest:guest@{host}:{port}";
            await Task.Delay(20000);
-           /*
-           var daprComponent = new
-           {
-               apiVersion = "dapr.io/v1alpha1",
-               kind = "Component",
-               metadata = new { name = "rabbit-pubsub" },
-               spec = new
-               {
-                   type = "pubsub.rabbitmq",
-                   version = "v1",
-                   metadata = new[]
-                   {
-                       new { name = "connectionString", value = $"amqp://guest:guest@{host}:{port}" }
-                   }
-               }
-           };
-
-           // Usamos el serializador oficial para convertir el objeto a un YAML perfecto
-           var serializer = new SerializerBuilder().Build();
-           var yamlContent = serializer.Serialize(daprComponent);
-
-           var targetFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".dapr", "components");
-
-           // Limpieza preventiva
-           var cleanFile = Path.Combine(targetFolder, "pubsub.yaml");
-           if (File.Exists(cleanFile)) File.Delete(cleanFile);
-
-           // Escribimos el archivo con la estructura garantizada
-           var targetFile = Path.Combine(targetFolder, "pubsub.yaml");
-           File.WriteAllText(targetFile, yamlContent);
-           */
        }));
        
     } )

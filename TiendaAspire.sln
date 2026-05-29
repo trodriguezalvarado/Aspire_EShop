@@ -42,6 +42,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		docker-compose.override.yml = docker-compose.override.yml
 		docker-compose.prod.yml = docker-compose.prod.yml
 		docker-compose.yml = docker-compose.yml
+		dapr\components-local\pubsub.yaml = dapr\components-local\pubsub.yaml
+		dapr\components-local\statestore.yaml = dapr\components-local\statestore.yaml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dapr-local", "dapr-local", "{FAAD818B-E75B-4901-826D-83BD456AC17F}"
+	ProjectSection(SolutionItems) = preProject
+		dapr\components-local\pubsub.yaml = dapr\components-local\pubsub.yaml
+		dapr\components-local\statestore.yaml = dapr\components-local\statestore.yaml
 	EndProjectSection
 EndProject
 Global
@@ -81,6 +89,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{FAAD818B-E75B-4901-826D-83BD456AC17F} = {58BE53D3-9862-4DEC-AC70-E6F174346991}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B1E72347-A065-4397-8D3B-6D358759E51F}

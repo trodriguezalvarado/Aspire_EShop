@@ -52,16 +52,21 @@
               "outputHashing": "all"
             },
             "development": {
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true
+            },
+            "localdeployment": {
               "fileReplacements": [
                 {
                   "replace": "src/app/environments/environment.ts",
                   "with": "src/app/environments/environment.local.ts"
                 }
               ],
-              "buildOptimizer": false,
               "optimization": false,
-              "vendorChunk": true,
-              "extractLicenses": false,
               "sourceMap": true,
               "namedChunks": true
             }
