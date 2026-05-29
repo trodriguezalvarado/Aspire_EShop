@@ -110,6 +110,21 @@ services:
       options:
         max-size: "10m"    # Maximum 10MB per log file
         max-file: "3"      # Keep only the last 3 files
+
+  tienda-web-dapr:
+    image: "daprio/daprd:1.14.4"
+    command: ["./daprd", "--app-id", "webfrontend", "--app-port", "80", "--app-channel-address", "tienda-web", "--dapr-http-port", "3500", "--resources-path", "/components"]
+    depends_on:
+      tienda-web:
+        condition: service_started
+    volumes:
+      - ./dapr/components-prod:/components:ro
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+    restart: always
   
   # Creamos un servicio NGINX dedicado como UNICO punto de entrada
   gateway-nginx:
@@ -143,6 +158,28 @@ services:
       options:
         max-size: "10m"    # Maximum 10MB per log file
         max-file: "3"      # Keep only the last 3 files
+
+  inventario-api-dapr:
+    image: "daprio/daprd:1.14.4"
+    command: ["./daprd", "--app-id", "inventarioservice", "--app-port", "80", "--app-channel-address", "inventario-api", "--dapr-http-port", "3500", "--dapr-grpc-port", "50001", "--resources-path", "/components"]
+    # --- ENVIRONMENT EXTRACTION CONTROL ---
+    # This safely bridges your host .env secrets straight into Dapr's template engine
+    environment:
+      - PROD_RABBITMQ_USER=${RABBITMQ_DEFAULT_USER}
+      - PROD_RABBITMQ_PASSWORD=${RABBITMQ_DEFAULT_PASS}
+    depends_on:
+      rabbitmq:
+        condition: service_healthy # Sidecar waits until RabbitMQ is 100% up
+      inventario-api:
+        condition: service_started
+    volumes:
+      - ./dapr/components-prod:/components:ro
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+    restart: always
   
   catalogo-api:
     restart: always
@@ -160,3 +197,26 @@ services:
       options:
         max-size: "10m"    # Maximum 10MB per log file
         max-file: "3"      # Keep only the last 3 files
+
+  catalogo-api-dapr:
+    image: "daprio/daprd:1.14.4"
+    command: ["./daprd", "--app-id", "catalogoservice", "--app-port", "80", "--app-channel-address", "catalogo-api", "--dapr-http-port", "3500", "--dapr-grpc-port", "50001", "--resources-path", "/components"]
+    environment:
+      - PROD_RABBITMQ_USER=${RABBITMQ_DEFAULT_USER}
+      - PROD_RABBITMQ_PASSWORD=${RABBITMQ_DEFAULT_PASS}
+      - PROD_REDIS_PASSWORD=${REDIS_STATIC_PASSWORD}
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      catalogo-api:
+        condition: service_started
+    volumes:
+      - ./dapr/components-prod:/components:ro
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+    restart: always

@@ -57,6 +57,9 @@ SQL_SA_PASSWORD=T34m0W2kRalperios*
 RABBITMQ_USER=guest
 RABBITMQ_PASS=guest
 
+#Credenciales para Redis
+REDIS_STATIC_PASSWORD=""
+
 # Cadenas de conexión para las APIs
 # Nota: Aquí usamos el nombre del servicio en Docker (sql-server, redis, etc.)
 CONNECTION_SQL_CATALOGO="Server=sql-server;Database=catalogdb;User Id=sa;Password=T34m0W2kRalperios*;TrustServerCertificate=True"
@@ -91,6 +94,9 @@ mkdir -p sql-data keycloak-data redis-data
 sudo chown -R 10001:0 ./sql-data
 sudo chown -R 1000:1000 ./keycloak-data
 sudo chmod -R 770 ./sql-data ./keycloak-data
+
+# Verify that the relative production Dapr folder exists before launching
+ls -la ./dapr/components-prod/
 ```
 
 ### 7. Construir y levantar la app usando ambos archivos docker-compose.yml y docker-compose.prod.yml

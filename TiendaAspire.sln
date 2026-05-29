@@ -52,6 +52,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dapr-local", "dapr-local", 
 		dapr\components-local\statestore.yaml = dapr\components-local\statestore.yaml
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dapr-prod", "dapr-prod", "{E3BA160A-930E-48A0-93DC-A700B3C094A7}"
+	ProjectSection(SolutionItems) = preProject
+		dapr\components-prod\pubsub.yaml = dapr\components-prod\pubsub.yaml
+		dapr\components-prod\statestore.yaml = dapr\components-prod\statestore.yaml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -92,6 +98,7 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{FAAD818B-E75B-4901-826D-83BD456AC17F} = {58BE53D3-9862-4DEC-AC70-E6F174346991}
+		{E3BA160A-930E-48A0-93DC-A700B3C094A7} = {58BE53D3-9862-4DEC-AC70-E6F174346991}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B1E72347-A065-4397-8D3B-6D358759E51F}
