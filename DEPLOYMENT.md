@@ -1,4 +1,4 @@
-#!/bin/bash
+ï»¿#!/bin/bash
 
 ### 0. Preparar el Sistema
 # Actualizar los repositorios e instalar Git
@@ -24,44 +24,40 @@ cd Aspire_EShop
  
 
 ### 4. Crear el archivo .env 
+Cree un archivo llamado `.env` en la raíz de la solución (`nano .env`) y configure sus variables de entorno reales. Este archivo actúa como la única fuente de verdad para todo el sistema, incluyendo las credenciales secretas que Docker Compose inyectará de forma automática en los componentes de Dapr:
+
 nano .env
-# [Adicione sus password reales aqui y el domininio o dirreccion IP del servidor]
-#Estas son las variables necesarias
+
+```bash
+# === CREDENCIALES ADMINISTRATIVAS ===
 KEYCLOAK_ADMIN_USER=admin
-KEYCLOAK_ADMIN_PASSWORD=admin
+KEYCLOAK_ADMIN_PASSWORD=admin_password_seguro
 
-# Nombre completo de dns o direccion ip del host, preferentemente nombre de dns
-# En las pruebas se creo el host tutienda.duckdns.org, y se utilizo duckdns para crear este host, una variante
-# facily rapida para una prueba de despliegue.
-# En caso de utilizar la direccion ip, se debe generar un certificado self signed ya que Cerbot no acepta direcciones ip
-HOSTNAME =Tu nombre de dominio o dirección Ip, Nombre de dominio recomendado
-
+# === CONFIGURACIÓN DE RED Y DOMINIO ===
+# Nombre completo de DNS (ej. tutienda.duckdns.org) o Dirección IP
+HOSTNAME=nombre de dns completo del host
 KC_HOSTNAME=${HOSTNAME}
 KC_HTTP_RELATIVE_PATH=/auth
 KC_HOSTNAME_STRICT=false
-KC_HOSTNAME_STRICT_HTTPS=false
-# El proxy-headers debe ser xforwarded
 KC_PROXY_HEADERS=xforwarded
+KEYCLOAK_URL=https://\${HOSTNAME}/auth/
 
-# Este valor es el del dominio que va a ser utilizado o la dirección ip, es recomendable usar un dominio
-KEYCLOAK_URL=https://${HOSTNAME}/auth/
-
-# Authority para validación de tokens en las APIs
-# omitir el /auth/ al final es la cuasa más común de dashboards vacios.
+# === AUTENTICACIÓN Y VALIDACIÓN DE APIS ===
 Authentication__Schemes__Bearer__Authority=https://${HOSTNAME}/auth/realms/TiendaRealm
 
-# Credenciales SQL Server
-SQL_SA_PASSWORD=T34m0W2kRalperios*
+# === INFRAESTRUCTURA DE DATOS (DAPR / COMPONENTES) ===
+# Estas credenciales serán inyectadas automáticamente por Docker Compose
+# en los archivos 'pubsub.yaml' y 'statestore.yaml' en tiempo de ejecución.
+RABBITMQ_DEFAULT_USER=guest
+RABBITMQ_DEFAULT_PASS=rabbit_password_seguro
+REDIS_STATIC_PASSWORD=redis_password_seguro
 
-# Credenciales RabbitMQ
-RABBITMQ_USER=guest
-RABBITMQ_PASS=guest
-
-# Cadenas de conexión para las APIs
-# Nota: Aquí usamos el nombre del servicio en Docker (sql-server, redis, etc.)
-CONNECTION_SQL_CATALOGO="Server=sql-server;Database=catalogdb;User Id=sa;Password=T34m0W2kRalperios*;TrustServerCertificate=True"
-CONNECTION_SQL_INVENTARIO="Server=sql-server;Database=inventorydb;User Id=sa;Password=T34m0W2kRalperios*;TrustServerCertificate=True"
-CONNECTION_RABBITMQ=amqp://guest:guest@rabbitmq:5672
+# === CADENAS DE CONEXIÓN APIS (.NET) ===
+SQL_SA_PASSWORD=sql_password_seguro
+CONNECTION_SQL_CATALOGO="Server=sql-server;Database=catalogdb;User Id=sa;Password=\${SQL_SA_PASSWORD};TrustServerCertificate=True"
+CONNECTION_SQL_INVENTARIO="Server=sql-server;Database=inventorydb;User Id=sa;Password=\${SQL_SA_PASSWORD};TrustServerCertificate=True"
+CONNECTION_RABBITMQ=amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq:5672
+```
 
 ### 5. Using https
 # IMPORTANTE: Asegúrate de que no haya ningún proceso usando el puerto 80 
@@ -91,9 +87,35 @@ mkdir -p sql-data keycloak-data redis-data
 sudo chown -R 10001:0 ./sql-data
 sudo chown -R 1000:1000 ./keycloak-data
 sudo chmod -R 770 ./sql-data ./keycloak-data
+
+# Verify that the relative production Dapr folder exists before launching
+ls -la ./dapr/components-prod/
 ```
 
-### 7. Construir y levantar la app usando ambos archivos docker-compose.yml y docker-compose.prod.yml
+### 7. Generar Configuraciones en Texto Plano e Iniciar la Aplicación
+
+Para garantizar la seguridad de sus credenciales, los archivos del repositorio son puras plantillas abstractas. Ejecute este bloque de comandos combinado en su terminal de Ubuntu. El sistema creará la carpeta física necesaria, leerá de forma segura las contraseñas de su archivo `.env`, inyectará los datos reales mediante `envsubst` en texto plano y levantará todo el clúster en segundo plano de manera automatizada:
+
+```bash
+# 1. Crear la carpeta física de destino para los componentes de producción
+mkdir -p dapr/components-prod
+
+# 2. Cargar variables del .env en la consola actual de Linux
+export \$(grep -v '^#' .env | xargs)
+
+# 3. Procesar las plantillas e inyectar las credenciales reales en texto plano
+envsubst < dapr/components-templates/pubsub.yaml > dapr/components-prod/pubsub.yaml
+envsubst < dapr/components-templates/statestore.yaml > dapr/components-prod/statestore.yaml
+
+
+```
+
+*Nota: La carpeta `dapr/components-prod/` contiene contraseñas en texto plano y ha sido protegida de forma estricta dentro del archivo `.gitignore` para evitar cualquier fuga accidental de secretos hacia el repositorio público de GitHub.*
+
+### 8. Construir y levantar la app usando ambos archivos docker-compose.yml y docker-compose.prod.yml
+
+# Detener cualquier instancia previa y levantar el entorno clúster en producción
+docker compose -f docker-compose.yml -f docker-compose.prod.yml down
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 
 # Verify that the "Gateway" is running

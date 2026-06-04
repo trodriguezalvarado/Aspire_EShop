@@ -1,5 +1,6 @@
 using TiendaAspire.Web;
 using TiendaAspire.Web.Components;
+using Dapr.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +13,11 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddOutputCache();
 
+builder.Services.AddDaprClient();
+
+builder.Services.AddScoped(sp =>
+    DaprClient.CreateInvokeHttpClient(appId: "catalogoservice"));
+
 builder.Services.AddHttpClient<WeatherApiClient>(client =>
     {
         // This URL uses "https+http://" to indicate HTTPS is preferred over HTTP.
@@ -19,13 +25,28 @@ builder.Services.AddHttpClient<WeatherApiClient>(client =>
         client.BaseAddress = new("https+http://apiservice");
         client.DefaultVersionPolicy = HttpVersionPolicy.RequestVersionOrLower;
     });
+//builder.Services.AddHttpClient<CatalogClient>(client =>
+//{
+//    // Use the name defined in the AppHost
+//    client.BaseAddress = new("http://catalogoservice");
+//})
+//    .AddServiceDiscovery()
+//    .AddStandardResilienceHandler();
+
 builder.Services.AddHttpClient<CatalogClient>(client =>
 {
-    // Use the name defined in the AppHost
-    client.BaseAddress = new("http://catalogoservice");
+    // 1. Point the base address directly to your local Dapr sidecar endpoint port
+    // (Aspire sets the DAPR_HTTP_PORT variable automatically)
+    var daprEndpoint = Environment.GetEnvironmentVariable("DAPR_HTTP_ENDPOINT")
+                       ?? $"http://localhost:{Environment.GetEnvironmentVariable("DAPR_HTTP_PORT") ?? "3500"}/";
+    
+    client.BaseAddress = new Uri(daprEndpoint);
+
+    // 2. THE FIX: Force the explicit Dapr destination App ID into the request headers
+    // This tells the Dapr sidecar EXACTLY which microservice must receive the request
+    client.DefaultRequestHeaders.Add("dapr-app-id", "catalogoservice");
 })
-    .AddServiceDiscovery()
-    .AddStandardResilienceHandler();
+.AddStandardResilienceHandler();
 
 var app = builder.Build();
 

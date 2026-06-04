@@ -68,3 +68,12 @@ Thumbs.db
 # Archivos temporales del AppHost
 **/AppHost/obj/
 **/AppHost/bin/
+
+**/dapr/components-prod/
+
+# --- ADD THIS WHITELIST EXCEPTION ROW ---
+!**/src/environments/
+!**/src/environments/*
+
+#/ Excluir la carpeta autogenerada de desarrollo local
+**/dapr/components-local/

@@ -18,11 +18,21 @@
 
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.AppHost" Version="8.2.2" />
+    <PackageReference Include="Aspire.Hosting.Dapr" Version="8.2.2" />
     <PackageReference Include="Aspire.Hosting.Keycloak" Version="8.2.2-preview.1.24521.5" />
     <PackageReference Include="Aspire.Hosting.NodeJs" Version="8.2.2" />
     <PackageReference Include="Aspire.Hosting.RabbitMQ" Version="8.2.2" />
     <PackageReference Include="Aspire.Hosting.Redis" Version="8.2.2" />
     <PackageReference Include="Aspire.Hosting.SqlServer" Version="8.2.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Components\pubsub.yaml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="dapr\components\pubsub.yaml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

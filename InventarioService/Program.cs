@@ -40,7 +40,7 @@ builder.Services.AddSwaggerGen(c => {
 });
 
 builder.AddSqlServerDbContext<InventarioDbContext>("inventorydb");
-builder.AddRabbitMQClient("messaging");
+builder.Services.AddDaprClient();
 
 builder.Services.AddCors(options =>
 {
@@ -73,30 +73,6 @@ builder.Services.AddAuthentication()
         };
     });
 
-
-//builder.Services.AddAuthentication()
-//                .AddKeycloakJwtBearer("keycloak", realm: "TiendaRealm", options =>
-//                {
-//                    options.RequireHttpsMetadata = false;
-//                    options.Audience = "account";
-//                    options.TokenValidationParameters = new TokenValidationParameters
-//                    {
-//                        ValidateIssuer = true,
-//                        // If it still fails, set this to false only for debugging:
-//                        // ValidateIssuer = false, 
-//                        ValidIssuer = "http://localhost:8081/realms/TiendaRealm",
-
-//                        ValidateAudience = false, // Sometimes the audience is 'account' or the Client ID
-//                        RoleClaimType = "role",
-//                        //SignatureValidator = delegate (string token, TokenValidationParameters parameters)
-//                        //{
-//                        //    var jwt = new Microsoft.IdentityModel.JsonWebTokens.JsonWebToken(token);
-//                        //    return jwt;
-//                        //}
-//                    };
-//options.Authority = "http://localhost:8081/realms/TiendaRealm";
-//                    options.SaveToken = true;
-//                });
 builder.Services.AddAuthorization();
 
 var app = builder.Build();

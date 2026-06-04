@@ -11,4 +11,9 @@
     <ProjectReference Include="..\TiendaAspire.ServiceDefaults\TiendaAspire.ServiceDefaults.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Dapr.AspNetCore" Version="1.15.0" />
+    <PackageReference Include="Dapr.Client" Version="1.15.0" />
+  </ItemGroup>
+
 </Project>

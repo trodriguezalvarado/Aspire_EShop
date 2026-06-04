@@ -1,13 +1,12 @@
 services:
-  # 1. Close internal ports by removing the port mapping
   sql-server:
     volumes:
-      - ./sql-data:/var/opt/mssql/data # Maps SQL data to a local folder  
+      - ./sql-data:/var/opt/mssql/data
     restart: always
     deploy:
       resources:
         limits:
-          memory: 2G  # SQL needs more RAM
+          memory: 2G
     logging:
       driver: "json-file"
       options:
@@ -16,12 +15,12 @@ services:
 
   redis:
     volumes:
-      - ./redis-data:/data # Maps Redis cache/state  
+      - ./redis-data:/data
     restart: always
     deploy:
       resources:
         limits:
-          memory: 256M  # Redis es muy eficiente, con 256MB suele sobrar para cache
+          memory: 256M
         reservations:
           memory: 64M
     logging:
@@ -35,7 +34,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 1G    # RabbitMQ necesita mas RAM para el panel de gestion y las colas
+          memory: 1G
         reservations:
           memory: 256M
     logging:
@@ -46,20 +45,20 @@ services:
 
   keycloak:
     volumes:
-      - ./keycloak-data:/opt/keycloak/data # Maps Keycloak users/settings
-      - ./tienda-realm-export.json:/opt/keycloak/data/import/realm.json:ro  
+      - ./keycloak-data:/opt/keycloak/data
+      - ./tienda-realm-export.json:/opt/keycloak/data/import/realm.json:ro
     restart: always
     deploy:
       resources:
         limits:
-          memory: 2G  # SQL needs more RAM
+          memory: 2G
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
     ports:
-      - "8081:8080" # Still needed for the browser login
+      - "8081:8080"
     environment:
       - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN_USER}
       - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
@@ -69,49 +68,60 @@ services:
       - KC_HOSTNAME_STRICT=${KC_HOSTNAME_STRICT}
       - KC_HTTP_ENABLED=true
       - KC_HOSTNAME_STRICT_HTTPS=${KC_HOSTNAME_STRICT_HTTPS}
-  # 2. Map Dashboard and Web to standard ports (80/443)
+
   admin-dashboard:
     build:
       args:
-        - BASE_HREF=/admin/ # This overrides the default for production     
-        - CONFIGURATION=production 
+        - BASE_HREF=/admin/
+        - CONFIGURATION=production
     environment:
-      # Pasamos la variable del .env al contenedor
       - KEYCLOAK_URL=${KEYCLOAK_URL}
     restart: always
-    # --- Resource Limits ---
     deploy:
       resources:
         limits:
-          cpus: '0.50'     # Limit to 50% of 1 CPU core
-          memory: 512M     # Limit to 512MB RAM
+          cpus: '0.50'
+          memory: 512M
         reservations:
-          memory: 128M     # Minimum guaranteed RAM
-    # --- Log Rotation ---
+          memory: 128M
     logging:
       driver: "json-file"
       options:
-        max-size: "10m"    # Maximum 10MB per log file
-        max-file: "3"      # Keep only the last 3 files
+        max-size: "10m"
+        max-file: "3"
 
   tienda-web:
     restart: always
-    # --- Resource Limits ---
+    volumes:
+      - dataprotection_keys:/root/.aspnet/DataProtection-Keys
     deploy:
       resources:
         limits:
-          cpus: '0.50'     # Limit to 50% of 1 CPU core
-          memory: 512M     # Limit to 512MB RAM
+          cpus: '0.50'
+          memory: 512M
         reservations:
-          memory: 128M     # Minimum guaranteed RAM
-    # --- Log Rotation ---
+          memory: 128M
     logging:
       driver: "json-file"
       options:
-        max-size: "10m"    # Maximum 10MB per log file
-        max-file: "3"      # Keep only the last 3 files
-  
-  # Creamos un servicio NGINX dedicado como UNICO punto de entrada
+        max-size: "10m"
+        max-file: "3"
+
+  tienda-web-dapr:
+    command: ["./daprd", "--app-id", "webfrontend", "--app-port", "80", "--app-channel-address", "tienda-web", "--dapr-http-port", "3500", "--resources-path", "/components"]
+    depends_on:
+      tienda-web:
+        condition: service_started
+    # --- CLEAN HOOK: Mounts your templates directory so the folder isn't blank ---
+    volumes:
+      - ./dapr/components-templates:/components:ro
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+    restart: always
+
   gateway-nginx:
     image: nginx:alpine
     ports:
@@ -124,39 +134,69 @@ services:
       - admin-dashboard
       - tienda-web
     restart: always
- 
 
-  # 3. Ensure APIs restart if the server reboots
   inventario-api:
     restart: always
-    # --- Resource Limits ---
+    volumes:
+      - dataprotection_keys:/root/.aspnet/DataProtection-Keys
+    extra_hosts:
+      - "${HOSTNAME}:host-gateway"
     deploy:
       resources:
         limits:
-          cpus: '0.50'     # Limit to 50% of 1 CPU core
-          memory: 512M     # Limit to 512MB RAM
+          cpus: '0.50'
+          memory: 512M
         reservations:
-          memory: 128M     # Minimum guaranteed RAM
-    # --- Log Rotation ---
+          memory: 128M
     logging:
       driver: "json-file"
       options:
-        max-size: "10m"    # Maximum 10MB per log file
-        max-file: "3"      # Keep only the last 3 files
-  
+        max-size: "10m"
+        max-file: "3"
+
+  inventario-api-dapr:
+    command: ["./daprd", "--app-id", "inventarioservice", "--app-port", "80", "--app-channel-address", "inventario-api", "--dapr-http-port", "3500", "--dapr-grpc-port", "50001", "--resources-path", "/components"]
+    extra_hosts:
+      - "${HOSTNAME}:host-gateway"
+    volumes:
+      # --- Pure volume mount of the static template folder ---
+      - ./dapr/components-prod:/components:ro
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+    restart: always
+
   catalogo-api:
     restart: always
-    # --- Resource Limits ---
+    volumes:
+      - dataprotection_keys:/root/.aspnet/DataProtection-Keys
+    extra_hosts:
+      - "${HOSTNAME}:host-gateway"
     deploy:
       resources:
         limits:
-          cpus: '0.50'     # Limit to 50% of 1 CPU core
-          memory: 512M     # Limit to 512MB RAM
+          cpus: '0.50'
+          memory: 512M
         reservations:
-          memory: 128M     # Minimum guaranteed RAM
-    # --- Log Rotation ---
+          memory: 128M
     logging:
       driver: "json-file"
       options:
-        max-size: "10m"    # Maximum 10MB per log file
-        max-file: "3"      # Keep only the last 3 files
+        max-size: "10m"
+        max-file: "3"
+
+  catalogo-api-dapr:
+    command: ["./daprd", "--app-id", "catalogoservice", "--app-port", "80", "--app-channel-address", "catalogo-api", "--dapr-http-port", "3500", "--dapr-grpc-port", "50001", "--resources-path", "/components"]
+    extra_hosts:
+      - "${HOSTNAME}:host-gateway"    
+    volumes:
+      # --- Pure volume mount of the static template folder ---
+      - ./dapr/components-prod:/components:ro
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+    restart: always
