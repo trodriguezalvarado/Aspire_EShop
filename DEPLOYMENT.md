@@ -1,4 +1,4 @@
-#!/bin/bash
+ï»¿#!/bin/bash
 
 ### 0. Preparar el Sistema
 # Actualizar los repositorios e instalar Git
@@ -36,14 +36,14 @@ KEYCLOAK_ADMIN_PASSWORD=admin_password_seguro
 # === CONFIGURACIÓN DE RED Y DOMINIO ===
 # Nombre completo de DNS (ej. tutienda.duckdns.org) o Dirección IP
 HOSTNAME=nombre de dns completo del host
-KC_HOSTNAME=\${HOSTNAME}
+KC_HOSTNAME=${HOSTNAME}
 KC_HTTP_RELATIVE_PATH=/auth
 KC_HOSTNAME_STRICT=false
 KC_PROXY_HEADERS=xforwarded
 KEYCLOAK_URL=https://\${HOSTNAME}/auth/
 
 # === AUTENTICACIÓN Y VALIDACIÓN DE APIS ===
-Authentication__Schemes__Bearer__Authority=https://\${HOSTNAME}/auth/realms/TiendaRealm
+Authentication__Schemes__Bearer__Authority=https://${HOSTNAME}/auth/realms/TiendaRealm
 
 # === INFRAESTRUCTURA DE DATOS (DAPR / COMPONENTES) ===
 # Estas credenciales serán inyectadas automáticamente por Docker Compose
@@ -56,7 +56,7 @@ REDIS_STATIC_PASSWORD=redis_password_seguro
 SQL_SA_PASSWORD=sql_password_seguro
 CONNECTION_SQL_CATALOGO="Server=sql-server;Database=catalogdb;User Id=sa;Password=\${SQL_SA_PASSWORD};TrustServerCertificate=True"
 CONNECTION_SQL_INVENTARIO="Server=sql-server;Database=inventorydb;User Id=sa;Password=\${SQL_SA_PASSWORD};TrustServerCertificate=True"
-CONNECTION_RABBITMQ=amqp://\({RABBITMQ_DEFAULT_USER}:\){RABBITMQ_DEFAULT_PASS}@rabbitmq:5672
+CONNECTION_RABBITMQ=amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq:5672
 ```
 
 ### 5. Using https
