@@ -1,5 +1,5 @@
 services:
-  # Infraestructura comun
+  # --- COMMON INFRASTRUCTURE SERVICES ---
   sql-server:
     image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
@@ -8,10 +8,10 @@ services:
     volumes:
       - sql_data:/var/opt/mssql
     healthcheck:
-          test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'T34m0W2kRalperios*' -Q 'SELECT 1' -C"]
-          interval: 10s
-          timeout: 5s
-          retries: 5
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'T34m0W2kRalperios*' -Q 'SELECT 1' -C"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:alpine
@@ -24,49 +24,41 @@ services:
   rabbitmq:
     image: rabbitmq:3-management
     healthcheck:
-      # This command explicitly checks if the internal broker nodes and core applications are fully running
       test: ["CMD-SHELL", "rabbitmq-diagnostics check_running && rabbitmq-diagnostics check_local_alarms"]
-      interval: 5s   # Check every 5 seconds instead of 10 to speed up your boot
+      interval: 5s
       timeout: 5s
       retries: 6
 
   keycloak:
-      image: quay.io/keycloak/keycloak:26.0
-      command: 
-        - start-dev 
-        - --import-realm  # <--- Este flag es vital para leer el JSON al arrancar
-      environment:
-        - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN_USER}
-        - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
-        # En la v26 es recomendable forzar el hostname si usas Nginx
-        - KC_HOSTNAME_STRICT=false
-        - KC_HTTP_ENABLED=true
-        - KC_PROXY_HEADERS=xforwarded
-      
-      volumes:
-        - keycloak_data:/opt/keycloak/data
-        # Inyectamos tu exportacion en la ruta que Keycloak 26 escanea por defecto
-        - ./tienda-realm-export.json:/opt/keycloak/data/import/realm.json:ro
+    image: keycloak/keycloak:26.0
+    command:
+      - start-dev
+      - --import-realm
+    environment:
+      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN_USER}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+      - KC_HOSTNAME_STRICT=false
+      - KC_HTTP_ENABLED=true
+      - KC_PROXY_HEADERS=xforwarded
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+      - ./tienda-realm-export.json:/opt/keycloak/data/import/realm.json:ro
 
-
-  
-
-  # Tus Microservicios
+  # --- MICROSERVICES SERVICES & SIDECARS ---
   inventario-api:
-    build: 
+    build:
       context: .
       dockerfile: InventarioService/Dockerfile
-    depends_on: 
-        sql-server: 
-            condition: service_healthy
-        rabbitmq:
-            condition: service_healthy
+    depends_on:
+      sql-server:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     environment:
       - ConnectionStrings__inventorydb=${CONNECTION_SQL_INVENTARIO}
       - Aspire__RabbitMQ__Client__ConnectionString=${CONNECTION_RABBITMQ}
       - Authentication__Schemes__Bearer__Authority=${Authentication__Schemes__Bearer__Authority}
       - DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_HTTP2UNENCRYPTEDSUPPORT=true
-      #- Aspire__StackExchange__Redis__ConnectionString=redis:6379
       - DAPR_HTTP_PORT=3500
       - DAPR_GRPC_PORT=50001
       - DAPR_GRPC_ENDPOINT=http://inventario-api-dapr:50001
@@ -74,25 +66,32 @@ services:
     networks:
       default:
         aliases:
-          - inventarioservice  # <--- Esto hace que http://catalogoservice funcione internamente
+          - inventarioservice
+
+  inventario-api-dapr:
+    image: "daprio/daprd:1.14.4"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      inventario-api:
+        condition: service_started
 
   catalogo-api:
     build:
       context: .
       dockerfile: TiendaAspire.ApiService/Dockerfile
-    depends_on: 
-        sql-server: 
-            condition: service_healthy
-        rabbitmq:
-            condition: service_healthy
-        redis:
-            condition: service_started
+    depends_on:
+      sql-server:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_started
     environment:
       - ConnectionStrings__catalogdb=${CONNECTION_SQL_CATALOGO}
       - Aspire__RabbitMQ__Client__ConnectionString=${CONNECTION_RABBITMQ}
       - Authentication__Schemes__Bearer__Authority=${Authentication__Schemes__Bearer__Authority}
       - DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_HTTP2UNENCRYPTEDSUPPORT=true
-      #- Aspire__StackExchange__Redis__ConnectionString=redis:6379
       - DAPR_HTTP_PORT=3500
       - DAPR_GRPC_PORT=50001
       - DAPR_GRPC_ENDPOINT=http://catalogo-api-dapr:50001
@@ -100,14 +99,23 @@ services:
     networks:
       default:
         aliases:
-          - catalogoservice  # <--- Esto hace que http://catalogoservice funcione internamente
+          - catalogoservice
 
-  # Tu Dashboard Angular
+  catalogo-api-dapr:
+    image: "daprio/daprd:1.14.4"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      catalogo-api:
+        condition: service_started
+
+  # --- FRONTENDS MANAGEMENT ---
   admin-dashboard:
     build:
       context: .
       dockerfile: TiendaAspire.admin-dashBoard/Dockerfile
-    
     depends_on:
       catalogo-api:
         condition: service_started
@@ -116,24 +124,25 @@ services:
     environment:
       - KEYCLOAK_URL=${KEYCLOAK_URL}
 
-  tienda-web:    
+  tienda-web:
     build:
       context: .
       dockerfile: TiendaAspire.Web/Dockerfile
     environment:
       - DAPR_HTTP_PORT=3500
       - DAPR_HTTP_ENDPOINT=http://tienda-web-dapr:3500
-      # - services__catalogo-api__http__0=http://catalogo-api:80
-      # - services__catalogo-api__https__0=http://catalogo-api:80
     depends_on:
       - catalogo-api
     volumes:
-      - dataprotection-keys:/root/.aspnet/DataProtection-Keys
+      - dataprotection_keys:/root/.aspnet/DataProtection-Keys
 
+  tienda-web-dapr:
+    image: "daprio/daprd:1.14.4"
+    depends_on:
+      - tienda-web
 
-
+# Global Volume Declarations (Fixed Underscores)
 volumes:
-  keycloak_data: # Definiciode volumen persistente
+  keycloak_data:
   sql_data:
-  dataprotection-keys:  
-  
+  dataprotection_keys:

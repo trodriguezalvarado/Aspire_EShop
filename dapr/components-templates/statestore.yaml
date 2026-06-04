@@ -9,7 +9,7 @@ spec:
   - name: redisHost
     value: "redis:6379"  
   - name: redisPassword
-    value: "{{env:PROD_REDIS_PASSWORD}}" 
+    value: "${REDIS_STATIC_PASSWORD}"  
   - name: actorStateStore
     value: "true"
   - name: ignoreErrors

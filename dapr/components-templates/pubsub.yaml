@@ -7,7 +7,7 @@ spec:
   version: v1
   metadata:
   - name: connectionString
-    value: "amqp://{{env:PROD_RABBITMQ_USER}}:{{env:PROD_RABBITMQ_PASSWORD}}@rabbitmq:5672"
+    value: "amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq:5672"
   - name: backOffMaxRetries
     value: "15"              # Allow up to 15 retries
   - name: backOffInitialInterval
