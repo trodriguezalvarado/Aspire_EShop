@@ -1,10 +1,10 @@
-Ôªø# Ì†ΩÌªí Aspire E-Shop: Cloud-Native Microservices Architecture
+Ôªø# üõí Aspire E-Shop: Cloud-Native Microservices Architecture
 
 Este proyecto es una implementaci√≥n avanzada de una tienda virtual basada en una arquitectura de microservicios distribuidos, utilizando **.NET Aspire** y **Dapr (Distributed Application Runtime)** [INDEX]. Est√° dise√±ada bajo est√°ndares empresariales para ser altamente escalable, segura, tolerante a fallos y optimizada para entornos de contenedores independientes gestionados por **Docker Compose** [INDEX].
 
 ---
 
-## Ì†ΩÌ∫Ä Arquitectura del Sistema
+## üöÄ Arquitectura del Sistema
 
 La soluci√≥n est√° construida sobre una red interna desacoplada y securizada, donde los componentes fundamentales operan de forma independiente y as√≠ncrona [INDEX]:
 
@@ -15,7 +15,7 @@ La soluci√≥n est√° construida sobre una red interna desacoplada y securizada, do
 
 ---
 
-## Ì†ΩÌª†Ô∏è Stack Tecnol√≥gico Enterprise
+## üõ†Ô∏è Stack Tecnol√≥gico Enterprise
 
 *   **Orquestador de Desarrollo**: .NET Aspire & AppHost Dashboard [INDEX].
 *   **Abstracci√≥n de Microservicios**: Dapr Runtime v1.14.4 (Sidecars distribuidos) [INDEX].
@@ -28,7 +28,7 @@ La soluci√≥n est√° construida sobre una red interna desacoplada y securizada, do
 
 ---
 
-## Ì†ΩÌ≤° Desaf√≠os T√©cnicos Resueltos
+## üí° Desaf√≠os T√©cnicos Resueltos
 
 Esta secci√≥n destaca la ingenier√≠a y resoluci√≥n de problemas reales implementados durante el desarrollo del proyecto:
 
@@ -39,7 +39,7 @@ Esta secci√≥n destaca la ingenier√≠a y resoluci√≥n de problemas reales implement
 
 ---
 
-## Ì†ΩÌ≥¶ C√≥mo ejecutar localmente
+## üì¶ C√≥mo ejecutar localmente
 
 Siga estos pasos estructurados para levantar el cl√∫ster completo de microservicios de forma local en su m√°quina de desarrollo utilizando las plantillas unificadas de Dapr [INDEX]:
 
